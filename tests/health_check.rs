@@ -1,4 +1,5 @@
-use forge::startup::run;
+use forge::{configuration::get_configuration, startup::run};
+use sqlx::{Connection, PgConnection};
 use std::{collections::HashMap, net::TcpListener};
 
 fn spawn_app() -> String {
@@ -13,6 +14,11 @@ fn spawn_app() -> String {
 #[tokio::test]
 async fn health_check_works() {
     let address = spawn_app();
+    let configuration = get_configuration().expect("Failed to read configuration");
+    let connection_string = configuration.database.connection_string();
+    let connection = PgConnection::connect(&connection_string)
+        .await
+        .expect("Failed to connect to Postgres.");
     let client = reqwest::Client::new();
 
     let response = client

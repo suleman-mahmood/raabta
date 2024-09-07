@@ -12,6 +12,7 @@ name= "forge"
 
 [dependencies]
 actix-web = "4.9.0"
+config = "0.14.0"
 reqwest = {version="0.12.7", features=["json"]}
 serde = {version="1.0.210", features=["derive"]}
 tokio = {version="1.40.0", features=["macros", "rt-multi-thread"]}
