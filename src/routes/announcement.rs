@@ -11,6 +11,13 @@ struct AnnouncementPostData {
 
 #[post("/announcement")]
 async fn announce(data: web::Json<AnnouncementPostData>, pool: web::Data<PgPool>) -> HttpResponse {
+    let request_id = Uuid::new_v4();
+    log::info!(
+        "request_id {} - Saving a new announcement in the database for {}",
+        request_id,
+        data.name
+    );
+
     let result = sqlx::query!(
         r#"
         insert into announcement (id, name, announcement)
@@ -24,9 +31,19 @@ async fn announce(data: web::Json<AnnouncementPostData>, pool: web::Data<PgPool>
     .await;
 
     match result {
-        Ok(_) => HttpResponse::Ok().finish(),
+        Ok(_) => {
+            log::info!(
+                "request_id {} - New announcement has been saved",
+                request_id
+            );
+            HttpResponse::Ok().finish()
+        }
         Err(e) => {
-            println!("Failed to execute query: {}", e);
+            log::error!(
+                "request_id {} - Failed to execute query: {:?}",
+                request_id,
+                e
+            );
             HttpResponse::InternalServerError().finish()
         }
     }
