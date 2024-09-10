@@ -18,7 +18,7 @@ services:
       branch: master
       # Deploy a new version on every commit to `main`!
       # Continuous Deployment, here we come!
-      deploy_on_push: false
+      deploy_on_push: true
       # !!! Fill in with your details
       # e.g. LukeMathWalker/zero-to-production
       repo: suleman-mahmood/raabta
@@ -37,3 +37,9 @@ services:
     # All incoming requests should be routed to our app
     routes:
       - path: /
+databases:
+  - engine: PG
+    name: raabta-dev
+    num_nodes: 1
+    size: db-s-dev-database
+    version: "16"

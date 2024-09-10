@@ -1,5 +1,5 @@
 use forge::{
-    configuration::{get_configuration, DatabaseSettings},
+    configuration::{get_configuration, DatabaseSettings, Settings},
     startup::run,
 };
 use sqlx::{Connection, Executor, PgConnection, PgPool};
@@ -9,6 +9,7 @@ use uuid::Uuid;
 pub struct TestApp {
     pub address: String,
     pub db_pool: PgPool,
+    pub config: Settings,
 }
 
 async fn spawn_app() -> TestApp {
@@ -26,11 +27,12 @@ async fn spawn_app() -> TestApp {
     TestApp {
         address,
         db_pool: connection_pool,
+        config: configuration,
     }
 }
 
 pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
-    let mut connection = PgConnection::connect(&config.connection_string_without_db())
+    let mut connection = PgConnection::connect_with(&config.without_db())
         .await
         .expect("Failed to connect to Postgres.");
     connection
@@ -38,7 +40,7 @@ pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
         .await
         .expect("Failed to create database.");
 
-    let connection_pool = PgPool::connect(&config.connection_string())
+    let connection_pool = PgPool::connect_with(config.with_db())
         .await
         .expect("Failed to connect to Postgres.");
     sqlx::migrate!("./migrations")
@@ -68,9 +70,7 @@ async fn health_check_works() {
 async fn announce_returns_200_for_valid_data() {
     let test_app = spawn_app().await;
     let client = reqwest::Client::new();
-    let configuration = get_configuration().expect("Failed to read configuration");
-    let connection_string = configuration.database.connection_string();
-    let mut connection = PgConnection::connect(&connection_string)
+    let mut connection = PgConnection::connect_with(&test_app.config.database.with_db())
         .await
         .expect("Failed to connect to Postgres.");
 
