@@ -30,5 +30,6 @@ features = [
 	"postgres",
 	"uuid",
 	"chrono",
-	"migrate"
+	"migrate",
+	"tls-rustls"
 ]
