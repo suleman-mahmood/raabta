@@ -120,3 +120,33 @@ async fn announce_returns_400_data_missing() {
         assert_eq!(400, response.status().as_u16(), "{}", error_message);
     }
 }
+#[tokio::test]
+async fn announce_returns_400_when_fields_are_present_but_empty() {
+    let test_app = spawn_app().await;
+    let client = reqwest::Client::new();
+    let test_cases = vec![
+        (
+            HashMap::from([("name", ""), ("announcement", "Welcome to area 51")]),
+            "name present but empty",
+        ),
+        (
+            HashMap::from([("name", "Suleman"), ("announcement", "")]),
+            "announcement present but empty",
+        ),
+        (
+            HashMap::from([("name", ""), ("announcement", "")]),
+            "both present but empty",
+        ),
+    ];
+
+    for (invalid_body, error_message) in test_cases {
+        let response = client
+            .post(format!("{}/announcement", test_app.address))
+            .json(&invalid_body)
+            .send()
+            .await
+            .expect("Failed to execute request.");
+
+        assert_eq!(400, response.status().as_u16(), "{}", error_message);
+    }
+}
