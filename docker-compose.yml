@@ -1,5 +1,20 @@
-version: '1'
+version: '3'
+
 services:
+  reverse-proxy:
+    # The official v3 Traefik docker image
+    image: traefik:latest
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker
+    ports:
+      - "8000:8000"
+      - "5432:5432"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+
   raabta_backend:
     image: forge
     ports:
