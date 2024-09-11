@@ -5,20 +5,22 @@ services:
     # The official v3 Traefik docker image
     image: traefik:latest
     # Enables the web UI and tells Traefik to listen to docker
-    command: --api.insecure=true --providers.docker
+    command: 
+      - "--api.insecure=true"                             # Enable the Traefik dashboard (dev mode)
+      - "--providers.docker=true"                         # Enable Docker provider
+      - "--entrypoints.web.address=:8000"                 # HTTP entrypoint for app traffic
     ports:
-      - "8000:8000"
-      - "5432:5432"
-      # The Web UI (enabled by --api.insecure=true)
-      - "8080:8080"
+      - "8000:8000"                                       # Forward port 8000 for HTTP app traffic
+      - "8080:8080"                                       # Web UI port
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
 
   raabta_backend:
     image: forge
-    # ports:
-    #   - "8000:8000"
+    labels:
+      - "traefik.http.routers.raabta_backend.rule=Host(`raabta_backend.localhost`)"
+      - "traefik.http.services.raabta_backend.loadbalancer.server.port=8000"
 
   raabta_postgres:
     image: postgres
@@ -29,7 +31,8 @@ services:
       POSTGRES_DB: raabta
     volumes:
       - raabta_pg_data:/var/lib/postgresql/data
-    # ports:
-    #   - "5432:5432"
+    ports:
+      - "5432:5432"
+
 volumes:
   raabta_pg_data:
