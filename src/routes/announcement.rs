@@ -28,6 +28,25 @@ impl TryFrom<AnnouncementPostData> for NewAnnouncement {
     }
 }
 
+async fn insert_announcement(
+    new_accouncement: NewAnnouncement,
+    pg_pool: &PgPool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        r#"
+        insert into announcement (id, name, announcement)
+        values ($1, $2, $3)
+        "#,
+        Uuid::new_v4(),
+        new_accouncement.name.as_ref(),
+        new_accouncement.announcement,
+    )
+    .execute(pg_pool)
+    .await?;
+
+    Ok(())
+}
+
 #[post("/announcement")]
 async fn announce(body: web::Json<AnnouncementPostData>, pool: web::Data<PgPool>) -> HttpResponse {
     log::info!(
@@ -39,19 +58,7 @@ async fn announce(body: web::Json<AnnouncementPostData>, pool: web::Data<PgPool>
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
 
-    let query_result = sqlx::query!(
-        r#"
-        insert into announcement (id, name, announcement)
-        values ($1, $2, $3)
-        "#,
-        Uuid::new_v4(),
-        new_accouncement.name.as_ref(),
-        new_accouncement.announcement,
-    )
-    .execute(pool.get_ref())
-    .await;
-
-    match query_result {
+    match insert_announcement(new_accouncement, &pool).await {
         Ok(_) => {
             log::info!("New announcement has been saved",);
             HttpResponse::Ok().finish()
