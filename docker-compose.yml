@@ -7,9 +7,14 @@ services:
 
   raabta_postgres:
     image: postgres
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: raabta
+    volumes:
+      - raabta_pg_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+volumes:
+  raabta_pg_data:
