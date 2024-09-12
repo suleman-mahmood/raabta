@@ -1,4 +1,4 @@
-use actix_web::{get, post, web, HttpResponse};
+use actix_web::{get, post, HttpResponse};
 use askama::Template;
 
 #[derive(Template)]
@@ -11,8 +11,6 @@ async fn login() -> HttpResponse {
 }
 
 #[post("/submit-login")]
-async fn submit_login(body: web::Payload) -> HttpResponse {
-    let bytes = body.to_bytes().await.unwrap();
-    log::info!("Got a submit login with data {:?}", bytes);
+async fn submit_login() -> HttpResponse {
     HttpResponse::Ok().body("Thank you!")
 }
