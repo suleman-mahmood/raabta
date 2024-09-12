@@ -12,6 +12,7 @@ name= "forge"
 
 [dependencies]
 actix-web = "4"
+askama = "0.12.1"
 config = "0.14"
 env_logger = "0.11.5"
 log = "0.4"

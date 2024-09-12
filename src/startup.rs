@@ -1,4 +1,7 @@
-use crate::routes::{announce, health_check};
+use crate::routes::{
+    admin_portal::login::{login, submit_login},
+    announce, health_check,
+};
 
 use std::net::TcpListener;
 
@@ -12,6 +15,8 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
             .wrap(Logger::default())
             .service(health_check)
             .service(announce)
+            .service(login)
+            .service(submit_login)
             .app_data(db_pool.clone())
     })
     .listen(listener)?

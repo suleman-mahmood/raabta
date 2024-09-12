@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
+        <title>Login</title>
+    </head>
+
+    <body>
+        <div>
+            <div>
+                <h2>Admin Dashboard</h2>
+                <form hx-post="/submit-login">
+                    <label for="email">Email:</label>
+                    <input type="text" id="email" name="email":wa placeholder="Enter email here" required>
+
+                    <button type="submit">
+                        Login!
+                        <div class="htmx-indicator"> Loading... </div>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </body>
+
+</html>

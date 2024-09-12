@@ -1,3 +1,4 @@
+pub mod admin_portal;
 pub mod announcement;
 pub mod health_check;
 
