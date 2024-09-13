@@ -1,5 +1,8 @@
 use crate::routes::{
-    admin_portal::login::{login, submit_login},
+    admin_portal::{
+        dashboard,
+        login::{login, submit_login},
+    },
     announce, health_check,
 };
 
@@ -17,6 +20,7 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
             .service(announce)
             .service(login)
             .service(submit_login)
+            .service(dashboard)
             .app_data(db_pool.clone())
     })
     .listen(listener)?

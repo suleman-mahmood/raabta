@@ -11,39 +11,28 @@
         <title>Login</title>
     </head>
 
-    <body>
-        <div class="hero bg-base-200 min-h-screen">
-          <div class="hero-content flex-col lg:flex-row-reverse">
-            <div class="text-center lg:text-left">
-              <h1 class="text-5xl font-bold">Login now!</h1>
-              <p class="py-6">
-                Manage your school operations
-              </p>
+    <body id="body" class="hero bg-base-200 min-h-screen">
+      <div class="hero-content">
+        <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
+          <form class="card-body" hx-post="/submit-login" hx-target="#body">
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Email</span>
+              </label>
+              <input name="email" type="email" placeholder="email" class="input input-bordered" required />
             </div>
-            <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
-              <form class="card-body" hx-post="/submit-login">
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Email</span>
-                  </label>
-                  <input type="email" placeholder="email" class="input input-bordered" required />
-                </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Password</span>
-                  </label>
-                  <input type="password" placeholder="password" class="input input-bordered" required />
-                  <label class="label">
-                    <a href="#" class="label-text-alt link link-hover">Forgot password?</a>
-                  </label>
-                </div>
-                <div class="form-control mt-6">
-                  <button class="btn btn-primary">Login <span class="loading loading-infinity loading-md htmx-indicator"></span></button>
-                </div>
-              </form>
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Password</span>
+              </label>
+              <input name="password" type="password" placeholder="password" class="input input-bordered" required />
             </div>
-          </div>
+            <div class="form-control mt-6">
+              <button class="btn btn-primary">Login <span class="loading loading-infinity loading-md htmx-indicator"></span></button>
+            </div>
+          </form>
         </div>
+      </div>
     </body>
 
 </html>
