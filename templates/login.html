@@ -1,40 +1,64 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="cupcake">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script
+      src="https://unpkg.com/htmx.org@2.0.2"
+      integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ"
+      crossorigin="anonymous"
+    ></script>
 
-        <title>Login</title>
-    </head>
+    <title>Login</title>
+  </head>
 
-    <body id="body">
-      <div class="hero bg-base-200 min-h-screen">
-        <div class="hero-content">
-          <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
-            <form class="card-body" hx-post="/submit-login" hx-target="#body">
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">Email</span>
-                </label>
-                <input name="email" type="email" placeholder="email" class="input input-bordered" required />
-              </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">Password</span>
-                </label>
-                <input name="password" type="password" placeholder="password" class="input input-bordered" required />
-              </div>
-              <div class="form-control mt-6">
-                <button class="btn btn-primary">Login <span class="loading loading-infinity loading-md htmx-indicator"></span></button>
-              </div>
-            </form>
-          </div>
+  <body id="body">
+    <div class="hero bg-base-200 min-h-screen">
+      <div class="hero-content">
+        <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
+          <form class="card-body" hx-post="/submit-login" hx-target="#body">
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Email</span>
+              </label>
+              <input
+                name="email"
+                type="email"
+                placeholder="email"
+                class="input input-bordered"
+                required
+              />
+            </div>
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Password</span>
+              </label>
+              <input
+                name="password"
+                type="password"
+                placeholder="password"
+                class="input input-bordered"
+                required
+              />
+            </div>
+            <div class="form-control mt-6">
+              <button class="btn btn-primary">
+                Login
+                <span
+                  class="loading loading-infinity loading-md htmx-indicator"
+                ></span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-    </body>
-
+    </div>
+  </body>
 </html>

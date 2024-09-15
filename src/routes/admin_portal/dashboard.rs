@@ -3,7 +3,7 @@ use std::{thread::sleep, time::Duration};
 use actix_web::{get, HttpResponse};
 use askama::Template;
 
-#[derive(Template())]
+#[derive(Template)]
 #[template(path = "dashboard.html")]
 struct DashboardTemplate {}
 

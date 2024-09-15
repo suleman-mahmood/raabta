@@ -5,8 +5,53 @@
     </div>
     <div class="flex-none">
       <ul class="menu menu-horizontal px-1">
-        <li><a>Users</a></li>
-        <li><a>Classes</a></li>
+        <li>
+          <a>Users</a>
+        </li>
+        <li>
+          <a>Classes</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="hero bg-base-200 min-h-screen">
+    <div class="hero-content">
+      <div class="card bg-base-100 w-full max-w-sm shrink-0">
+        <form class="card-body">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Email</span>
+            </label>
+            <input
+              name="email"
+              type="email"
+              placeholder="email"
+              class="input input-bordered"
+              required
+            />
+          </div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Password</span>
+            </label>
+            <input
+              name="password"
+              type="password"
+              placeholder="password"
+              class="input input-bordered"
+              required
+            />
+          </div>
+          <div class="form-control mt-6">
+            <button class="btn btn-primary">
+              Login
+              <span
+                class="loading loading-infinity loading-md htmx-indicator"
+              ></span>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>
