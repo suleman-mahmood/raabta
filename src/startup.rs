@@ -1,10 +1,4 @@
-use crate::routes::{
-    admin_portal::{
-        dashboard,
-        login::{login, submit_login},
-    },
-    announce, health_check,
-};
+use crate::routes::{announce, dashboard, health_check, login, submit_login};
 
 use std::net::TcpListener;
 

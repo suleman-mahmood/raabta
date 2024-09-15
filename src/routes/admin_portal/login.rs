@@ -37,14 +37,3 @@ async fn submit_login(body: web::Form<SubmitLoginFormData>) -> HttpResponse {
         HttpResponse::Ok().body(LoginSuccessTemplate {}.render().unwrap())
     }
 }
-
-#[derive(Template)]
-#[template(path = "dashboard.html")]
-struct DashboardTemplate {}
-
-#[get("/dashboard")]
-async fn dashboard() -> HttpResponse {
-    sleep(Duration::from_secs(2));
-
-    HttpResponse::Ok().body(DashboardTemplate {}.render().unwrap())
-}
