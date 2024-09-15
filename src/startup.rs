@@ -1,4 +1,4 @@
-use crate::routes::{announce, dashboard, health_check, login, submit_login};
+use crate::routes::{announce, dashboard, default, health_check, login, submit_login};
 
 use std::net::TcpListener;
 
@@ -10,6 +10,7 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
     let server = HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
+            .service(default)
             .service(health_check)
             .service(announce)
             .service(login)
