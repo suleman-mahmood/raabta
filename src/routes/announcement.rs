@@ -34,11 +34,11 @@ async fn insert_announcement(
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         r#"
-        insert into announcement (id, name, announcement)
+        insert into announcement (id, announcer_user_id, content)
         values ($1, $2, $3)
         "#,
         Uuid::new_v4(),
-        new_accouncement.name.as_ref(),
+        Uuid::new_v4(), // new_accouncement.name.as_ref(),
         new_accouncement.announcement,
     )
     .execute(pg_pool)

@@ -11,7 +11,7 @@ struct UserData {
     first_name: String,
     last_name: String,
     email: String,
-    phone_number: String,
+    phone_number: Option<String>,
     created_at: String,
     updated_at: String,
 }
@@ -25,3 +25,5 @@ struct SchoolAdmin {
     id: String,
     display_name: String,
 }
+
+impl RaabtaUser {}
