@@ -18,7 +18,8 @@ services:
     environment:
       APP_ENVIRONMENT: production
     labels:
-      - "traefik.http.routers.raabta_backend.rule=Host('195.201.32.108')"
+      - "traefik.http.routers.raabta_backend.rule=Host(`195.201.32.108`)"
+      - "traefik.http.services.raabta_backend.loadbalancer.server.port=80"
 
   raabta_postgres:
     image: postgres:latest
