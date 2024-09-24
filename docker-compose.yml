@@ -17,6 +17,8 @@ services:
     image: forge
     # ports:
     #   - "8000:8000"
+    labels:
+      - "traefik.http.routers.raabta_backend.rule=Host('195.201.32.108')"
 
   raabta_postgres:
     image: postgres:latest
