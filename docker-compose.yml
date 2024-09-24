@@ -15,15 +15,13 @@ services:
 
   raabta_backend:
     image: forge
-    # ports:
-    #   - "8000:8000"
+    environment:
+      APP_ENVIRONMENT: production
     labels:
       - "traefik.http.routers.raabta_backend.rule=Host('195.201.32.108')"
 
   raabta_postgres:
     image: postgres:latest
-    # ports:
-    #   - "5432:5432"
     restart: always
     environment:
       POSTGRES_USER: postgres

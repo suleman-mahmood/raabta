@@ -1,5 +1,6 @@
 application:
-  port: 8000
+  port: 80
+  host: "localhost"
 
 database:
   host: "localhost"
