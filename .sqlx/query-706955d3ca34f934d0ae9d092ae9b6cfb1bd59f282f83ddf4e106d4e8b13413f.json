@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        insert into raabta_user (id, display_name, first_name, last_name, email, phone_number, user_role)\n        values ($1, $2, $3, $4, $5, $6, $7)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        {
+          "Custom": {
+            "name": "userrole",
+            "kind": {
+              "Enum": [
+                "STUDENT",
+                "PARENT",
+                "TEACHER",
+                "SCHOOL_ADMIN"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "706955d3ca34f934d0ae9d092ae9b6cfb1bd59f282f83ddf4e106d4e8b13413f"
+}

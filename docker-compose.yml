@@ -1,13 +1,27 @@
 services:
+  reverse-proxy:
+    image: traefik:latest
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker"
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+
   raabta_backend:
     image: forge
-    ports:
-      - "8000:8000"
+    # ports:
+    #   - "8000:8000"
 
   raabta_postgres:
     image: postgres:latest
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
     restart: always
     environment:
       POSTGRES_USER: postgres
