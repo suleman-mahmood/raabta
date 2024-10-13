@@ -1,6 +1,8 @@
 pub struct NewAnnouncement {
     pub announcement: String,
     pub name: AnnouncerName,
+    pub announcer_id: String,
+    pub class_id: Option<String>,
 }
 
 pub struct AnnouncerName(String);

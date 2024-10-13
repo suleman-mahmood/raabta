@@ -9,6 +9,8 @@ use crate::domain::{AnnouncerName, NewAnnouncement};
 struct AnnouncementPostData {
     name: String,
     announcement: String,
+    announcer_id: String,
+    class_id: Option<String>,
 }
 
 impl TryFrom<AnnouncementPostData> for NewAnnouncement {
@@ -24,6 +26,8 @@ impl TryFrom<AnnouncementPostData> for NewAnnouncement {
         Ok(Self {
             announcement: value.announcement.clone(),
             name,
+            announcer_id: value.announcer_id,
+            class_id: value.class_id,
         })
     }
 }
@@ -34,11 +38,15 @@ async fn insert_announcement(
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         r#"
-        insert into announcement (id, announcer_user_id, content)
-        values ($1, $2, $3)
+        insert into announcement (id, announcer_user_id, class_id, content)
+        values ($1, $2, $3, $4)
         "#,
         Uuid::new_v4(),
-        Uuid::new_v4(), // new_accouncement.name.as_ref(),
+        Uuid::parse_str(&new_accouncement.announcer_id).unwrap(),
+        match new_accouncement.class_id {
+            Some(class_id) => Uuid::parse_str(&class_id).ok(),
+            None => None,
+        },
         new_accouncement.announcement,
     )
     .execute(pg_pool)
