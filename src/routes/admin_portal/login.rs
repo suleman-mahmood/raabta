@@ -1,5 +1,3 @@
-use std::{thread::sleep, time::Duration};
-
 use actix_web::{get, post, web, HttpResponse};
 use askama::Template;
 use serde::Deserialize;
@@ -15,7 +13,7 @@ async fn login() -> HttpResponse {
 
 #[derive(Template)]
 #[template(path = "wrong_login_credentials.html")]
-struct SubmitLoginTemplate {}
+struct WrongCredentialsTemplate {}
 
 #[derive(Template)]
 #[template(path = "login_success.html")]
@@ -29,11 +27,10 @@ struct SubmitLoginFormData {
 
 #[post("/submit-login")]
 async fn submit_login(body: web::Form<SubmitLoginFormData>) -> HttpResponse {
-    sleep(Duration::from_secs(2));
-
-    if body.email != "admin@raabta.com" || body.password != "root" {
-        HttpResponse::Ok().body(SubmitLoginTemplate {}.render().unwrap())
-    } else {
+    // TODO: Move these credentials to env variables or config files
+    if body.email == "admin@raabta.com" && body.password == "root" {
         HttpResponse::Ok().body(LoginSuccessTemplate {}.render().unwrap())
+    } else {
+        HttpResponse::Ok().body(WrongCredentialsTemplate {}.render().unwrap())
     }
 }
