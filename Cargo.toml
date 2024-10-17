@@ -21,6 +21,7 @@ serde = {version="1", features=["derive"]}
 serde-aux = "3"
 tokio = {version="1", features=["macros", "rt-multi-thread"]}
 uuid = {version="1", features=["v4"]}
+jsonwebtoken = {version = "9"}
 
 [dependencies.sqlx]
 version = "0.8"
