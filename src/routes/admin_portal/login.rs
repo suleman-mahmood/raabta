@@ -38,10 +38,6 @@ async fn login(req: HttpRequest) -> HttpResponse {
 #[template(path = "wrong_login_credentials.html")]
 struct WrongCredentialsTemplate {}
 
-#[derive(Template)]
-#[template(path = "login_success.html")]
-struct LoginSuccessTemplate {}
-
 #[derive(Deserialize)]
 struct SubmitLoginFormData {
     email: String,
@@ -91,9 +87,12 @@ async fn submit_login(body: web::Form<SubmitLoginFormData>) -> HttpResponse {
             log::info!("Created a cookie successfully, {:?}", cookie);
             HttpResponse::Ok()
                 .insert_header(cookie)
-                .body(LoginSuccessTemplate {}.render().unwrap())
+                .insert_header(("HX-Location", "/dashboard"))
+                .body("Ok")
         } else {
-            HttpResponse::Ok().body(LoginSuccessTemplate {}.render().unwrap())
+            HttpResponse::Ok()
+                .insert_header(("HX-Location", "/dashboard"))
+                .body("Ok")
         }
     } else {
         HttpResponse::Ok().body(WrongCredentialsTemplate {}.render().unwrap())
