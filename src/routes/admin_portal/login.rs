@@ -1,12 +1,12 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use actix_web::{get, post, web, HttpRequest, HttpResponse};
+use actix_web::{get, post, web, HttpResponse};
 use askama::Template;
-use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{encode, EncodingKey, Header};
 use serde::{Deserialize, Serialize};
 
 // TODO: Move these to env or config
-const JWT_SECRET: &str = "secret_af";
+pub const JWT_SECRET: &str = "secret_af";
 const ADMIN_EMAIL: &str = "admin@raabta.com";
 const ADMIN_PASS: &str = "root";
 
@@ -15,22 +15,7 @@ const ADMIN_PASS: &str = "root";
 struct LoginTemplate {}
 
 #[get("/login")]
-async fn login(req: HttpRequest) -> HttpResponse {
-    if let Some(token_cookie) = req.cookie("token") {
-        log::info!("Got token cookie {}", token_cookie.value());
-        if let Ok(token_data) = decode::<Claims>(
-            token_cookie.value(),
-            &DecodingKey::from_secret(JWT_SECRET.to_string().as_ref()),
-            &Validation::default(),
-        ) {
-            let claims = token_data.claims;
-            log::info!("Got claims: {:?}", claims);
-
-            if claims.user_role == UserRoleAdminPortal::Admin {
-                log::info!("Admin found!")
-            }
-        }
-    }
+async fn login() -> HttpResponse {
     HttpResponse::Ok().body(LoginTemplate {}.render().unwrap())
 }
 
@@ -45,14 +30,14 @@ struct SubmitLoginFormData {
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
-enum UserRoleAdminPortal {
+pub enum UserRoleAdminPortal {
     Admin,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Claims {
+pub struct Claims {
     exp: usize,
-    user_role: UserRoleAdminPortal,
+    pub user_role: UserRoleAdminPortal,
 }
 
 fn create_cookie() -> Option<(String, String)> {

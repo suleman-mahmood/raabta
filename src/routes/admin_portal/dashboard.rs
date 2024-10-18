@@ -5,7 +5,7 @@ use askama::Template;
 #[template(path = "dashboard.html")]
 struct DashboardTemplate {}
 
-#[get("/dashboard")]
+#[get("")]
 async fn dashboard() -> HttpResponse {
     HttpResponse::Ok().body(DashboardTemplate {}.render().unwrap())
 }
