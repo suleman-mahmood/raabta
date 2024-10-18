@@ -1,36 +1,45 @@
+use regex::Regex;
+use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::routes::UserRole;
-
-enum RaabtaUser {
-    Student(Student),
-    Parent(UserData),
-    Teacher(UserData),
-    SchoolAdmin(SchoolAdmin),
+#[derive(Deserialize, sqlx::Type)]
+#[sqlx(type_name = "UserRole", rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum UserRole {
+    Student,
+    Parent,
+    Teacher,
+    SchoolAdmin,
 }
 
-struct UserData {
-    id: String,
-    display_name: String,
-    first_name: String,
-    last_name: String,
-    email: String,
-    phone_number: Option<String>,
-    created_at: String,
-    updated_at: String,
-}
+// enum RaabtaUser {
+//     Student(Student),
+//     Parent(UserData),
+//     Teacher(UserData),
+//     SchoolAdmin(SchoolAdmin),
+// }
 
-struct Student {
-    uesr_data: UserData,
-    parent_user_id: String,
-}
+// struct UserData {
+//     id: String,
+//     display_name: String,
+//     first_name: String,
+//     last_name: String,
+//     email: String,
+//     phone_number: Option<String>,
+//     created_at: String,
+//     updated_at: String,
+// }
 
-struct SchoolAdmin {
-    id: String,
-    display_name: String,
-}
+// struct Student {
+//     uesr_data: UserData,
+//     parent_user_id: String,
+// }
 
-impl RaabtaUser {}
+// struct SchoolAdmin {
+//     id: String,
+//     display_name: String,
+// }
+
+// impl RaabtaUser {}
 
 pub struct NewUser {
     pub id: Uuid,
@@ -38,7 +47,7 @@ pub struct NewUser {
     pub first_name: UserName,
     pub last_name: UserName,
     pub email: UserEmail,
-    pub phone_number: Option<String>,
+    pub phone_number: UserPhoneNumber,
     pub user_role: UserRole,
 }
 
@@ -88,12 +97,43 @@ impl AsRef<str> for DisplayName {
 
 pub struct UserEmail(String);
 impl UserEmail {
-    pub fn parse(first_name: &UserName) -> UserEmail {
-        Self(format!("{}@riveroaks.com", first_name.0))
+    pub fn parse(email: String, first_name: &UserName) -> UserEmail {
+        let email_regex = Regex::new(
+            r#"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"#,
+        ).unwrap();
+        let default_email = Self(format!("{}@riveroaks.com", first_name.0.to_lowercase()));
+
+        match email.is_empty() {
+            true => default_email,
+            false => {
+                if email_regex.is_match(&email) {
+                    Self(email)
+                } else {
+                    default_email
+                }
+            }
+        }
     }
 }
 impl AsRef<str> for UserEmail {
     fn as_ref(&self) -> &str {
         &self.0
+    }
+}
+
+pub struct UserPhoneNumber(pub Option<String>);
+impl UserPhoneNumber {
+    pub fn parse(phone_number: String) -> UserPhoneNumber {
+        let phone_regex = Regex::new(r"^\d{4}-\d{7}$").unwrap();
+        match phone_number.is_empty() {
+            true => Self(None),
+            false => {
+                if phone_regex.is_match(&phone_number) {
+                    Self(Some(phone_number))
+                } else {
+                    Self(None)
+                }
+            }
+        }
     }
 }

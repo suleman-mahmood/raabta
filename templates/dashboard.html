@@ -15,10 +15,14 @@
     </ul>
   </div>
 </div>
+
 <div class="hero bg-base-200 min-h-screen">
   <div class="hero-content">
     <div class="card bg-base-100 w-full max-w-sm shrink-0">
-      <form class="card-body">
+      <form
+        class="card-body"
+        hx-post="/dashboard/user"
+      >
         <div class="form-control">
           <label class="label">
             <span class="label-text">First Name</span>
