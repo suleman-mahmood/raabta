@@ -15,6 +15,15 @@ async fn dashboard() -> HttpResponse {
     HttpResponse::Ok().body(DashboardTemplate {}.render().unwrap())
 }
 
+#[derive(Template)]
+#[template(path = "create_user.html")]
+struct CreateUserTemplate {}
+
+#[get("/user")]
+async fn create_user_view() -> HttpResponse {
+    HttpResponse::Ok().body(CreateUserTemplate {}.render().unwrap())
+}
+
 #[derive(Debug, Deserialize)]
 struct CreateUserFormData {
     first_name: String,
@@ -70,5 +79,7 @@ async fn create_user(body: web::Form<CreateUserFormData>, pool: web::Data<PgPool
         return HttpResponse::BadRequest().finish();
     }
 
-    HttpResponse::Ok().body("Created User!")
+    HttpResponse::Ok()
+        .insert_header(("HX-Location", "/dashboard"))
+        .body("Created User!")
 }

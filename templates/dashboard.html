@@ -16,67 +16,39 @@
   </div>
 </div>
 
+<div class="w-full flex bg-base-200">
+  <button class="btn btn-primary mx-auto my-4" hx-get="/dashboard/user" hx-target="body" hx-push-url="true">Create user</button>
+</div>
+
 <div class="hero bg-base-200 min-h-screen">
   <div class="hero-content">
-    <div class="card bg-base-100 w-full max-w-sm shrink-0">
-      <form
-        class="card-body"
-        hx-post="/dashboard/user"
-      >
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">First Name</span>
-          </label>
-          <input
-            name="first_name"
-            placeholder="First Name"
-            class="input input-bordered"
-            required
-          />
-        </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Last Name</span>
-          </label>
-          <input
-            name="last_name"
-            placeholder="Last Name"
-            class="input input-bordered"
-            required
-          />
-        </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Email (optinal)</span>
-          </label>
-          <input
-            name="user_email"
-            placeholder="Email"
-            class="input input-bordered"
-          />
-        </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Phone number (optinal)</span>
-          </label>
-          <input
-            name="phone_number"
-            type="tel"
-            placeholder="0333-3778899"
-            class="input input-bordered"
-          />
-        </div>
-        <div class="form-control mt-6">
-          <button class="btn btn-primary">
-            Create user
-            <span
-              class="loading loading-infinity loading-md htmx-indicator"
-            ></span>
-          </button>
-        </div>
-      </form>
+      <!-- All users -->
+    <div class="overflow-x-auto">
+      <table class="table table-xs table-pin-cols">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Job</th>
+            <th>company</th>
+            <th>location</th>
+            <th>Last Login</th>
+            <th>Favorite Color</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>1</th>
+            <td>Cy Ganderton</td>
+            <td>Quality Control Specialist</td>
+            <td>Littel, Schaden and Vandervort</td>
+            <td>Canada</td>
+            <td>12/16/2020</td>
+            <td>Blue</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
-
 {% endblock %}

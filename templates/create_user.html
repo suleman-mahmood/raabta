@@ -1,0 +1,82 @@
+{% extends "layout.html" %} {% block content %}
+
+<div class="navbar bg-base-100">
+  <div class="flex-1">
+    <a class="btn btn-ghost text-xl">Raabta</a>
+  </div>
+  <div class="flex-none">
+    <ul class="menu menu-horizontal px-1">
+      <li>
+        <a>Users</a>
+      </li>
+      <li>
+        <a>Classes</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="hero bg-base-200 min-h-screen">
+  <div class="hero-content">
+    <div class="flex flex-col card bg-base-100 w-full">
+      <!-- Create user form -->
+      <form
+        class="card-body"
+        hx-post="/dashboard/user"
+      >
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">First Name</span>
+          </label>
+          <input
+            name="first_name"
+            placeholder="First Name"
+            class="input input-bordered"
+            required
+          />
+        </div>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Last Name</span>
+          </label>
+          <input
+            name="last_name"
+            placeholder="Last Name"
+            class="input input-bordered"
+            required
+          />
+        </div>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Email (optinal)</span>
+          </label>
+          <input
+            name="user_email"
+            placeholder="Email"
+            class="input input-bordered"
+          />
+        </div>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Phone number (optinal)</span>
+          </label>
+          <input
+            name="phone_number"
+            type="tel"
+            placeholder="0333-3778899"
+            class="input input-bordered"
+          />
+        </div>
+        <div class="form-control mt-6">
+          <button class="btn btn-primary">
+            Create user
+            <span
+              class="loading loading-infinity loading-md htmx-indicator"
+            ></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

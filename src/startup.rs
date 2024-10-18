@@ -1,6 +1,6 @@
 use crate::routes::{
-    announce, create_user, dashboard, default, health_check, login, submit_login, Claims,
-    UserRoleAdminPortal, JWT_SECRET,
+    announce, create_user, create_user_view, dashboard, default, health_check, login, submit_login,
+    Claims, UserRoleAdminPortal, JWT_SECRET,
 };
 
 use std::net::TcpListener;
@@ -54,6 +54,7 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
                 web::scope("/dashboard")
                     .service(dashboard)
                     .service(create_user)
+                    .service(create_user_view)
                     .wrap(from_fn(cookie_jwt_auth_middleware)),
             )
             .app_data(db_pool.clone())
