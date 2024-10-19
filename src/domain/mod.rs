@@ -1,5 +1,5 @@
-pub mod domain;
+pub mod announcement;
 pub mod raabta_user;
 
-pub use domain::*;
+pub use announcement::*;
 pub use raabta_user::*;

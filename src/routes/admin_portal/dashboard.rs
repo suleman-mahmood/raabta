@@ -60,7 +60,7 @@ async fn create_user(body: web::Form<CreateUserFormData>, pool: web::Data<PgPool
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
 
-    if let Err(_) = sqlx::query!(
+    if sqlx::query!(
         r#"
         insert into raabta_user (id, display_name, first_name, last_name, email, phone_number, user_role)
         values ($1, $2, $3, $4, $5, $6, $7)
@@ -75,6 +75,7 @@ async fn create_user(body: web::Form<CreateUserFormData>, pool: web::Data<PgPool
     )
     .execute(pool.get_ref())
     .await
+    .is_err()
     {
         return HttpResponse::BadRequest().finish();
     }

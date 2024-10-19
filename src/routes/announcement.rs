@@ -20,7 +20,7 @@ impl TryFrom<AnnouncementPostData> for NewAnnouncement {
         let name = AnnouncerName::parse(value.name.clone())?;
 
         if value.announcement.trim().is_empty() {
-            return Err(format!("Annoucement cannot be empty"));
+            return Err("Annoucement cannot be empty".to_string());
         }
 
         Ok(Self {
