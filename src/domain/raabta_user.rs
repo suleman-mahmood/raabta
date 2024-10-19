@@ -121,7 +121,7 @@ impl AsRef<str> for UserEmail {
     }
 }
 
-pub struct UserPhoneNumber(pub Option<String>);
+pub struct UserPhoneNumber(Option<String>);
 impl UserPhoneNumber {
     pub fn parse(phone_number: String) -> UserPhoneNumber {
         let phone_regex = Regex::new(r"^\d{4}-\d{7}$").unwrap();
@@ -135,5 +135,10 @@ impl UserPhoneNumber {
                 }
             }
         }
+    }
+}
+impl AsRef<Option<String>> for UserPhoneNumber {
+    fn as_ref(&self) -> &Option<String> {
+        &self.0
     }
 }

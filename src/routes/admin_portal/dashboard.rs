@@ -70,7 +70,7 @@ async fn create_user(body: web::Form<CreateUserFormData>, pool: web::Data<PgPool
         new_user.first_name.as_ref(),
         new_user.last_name.as_ref(),
         new_user.email.as_ref(),
-        new_user.phone_number.0,
+        new_user.phone_number.as_ref().clone(),
         &new_user.user_role as &UserRole,
     )
     .execute(pool.get_ref())
