@@ -14,8 +14,20 @@ const ADMIN_PASS: &str = "root";
 #[template(path = "login.html")]
 struct LoginTemplate {}
 
+#[derive(Deserialize)]
+struct LoginQuery {
+    logout: Option<bool>,
+}
+
 #[get("/login")]
-async fn login() -> HttpResponse {
+async fn login(login_query: web::Query<LoginQuery>) -> HttpResponse {
+    if let Some(true) = login_query.logout {
+        if let Some(cookie) = logout_cookie() {
+            return HttpResponse::Ok()
+                .insert_header(cookie)
+                .body(LoginTemplate {}.render().unwrap());
+        }
+    }
     HttpResponse::Ok().body(LoginTemplate {}.render().unwrap())
 }
 
@@ -38,6 +50,13 @@ pub enum UserRoleAdminPortal {
 pub struct Claims {
     exp: usize,
     pub user_role: UserRoleAdminPortal,
+}
+
+fn logout_cookie() -> Option<(String, String)> {
+    Some((
+        "Set-Cookie".to_string(),
+        format!("token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Path=/; SameSite=Strict;"),
+    ))
 }
 
 fn create_cookie() -> Option<(String, String)> {

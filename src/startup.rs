@@ -1,4 +1,4 @@
-use crate::routes::{
+use crate::admin_portal::{
     announce, create_user, create_user_view, dashboard, default, health_check, login, submit_login,
     users, Claims, UserRoleAdminPortal, JWT_SECRET,
 };
