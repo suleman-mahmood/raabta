@@ -1,20 +1,6 @@
 {% extends "layout.html" %} {% block content %}
 
-<div class="navbar bg-base-100">
-  <div class="flex-1">
-    <a class="btn btn-ghost text-xl">Raabta</a>
-  </div>
-  <div class="flex-none">
-    <ul class="menu menu-horizontal px-1">
-      <li>
-        <a>Users</a>
-      </li>
-      <li>
-        <a>Classes</a>
-      </li>
-    </ul>
-  </div>
-</div>
+{% include "navbar.html" %}
 
 <div class="hero bg-base-200 min-h-screen">
   <div class="hero-content">
@@ -22,7 +8,7 @@
       <!-- Create user form -->
       <form
         class="card-body"
-        hx-post="/dashboard/user"
+        hx-post="/user"
       >
         <div class="form-control">
           <label class="label">
