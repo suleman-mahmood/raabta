@@ -1,6 +1,23 @@
 use sqlx::{postgres::PgQueryResult, Error, PgPool};
 
-use crate::admin_portal::{NewUser, UserRole};
+use crate::admin_portal::{NewUser, UserDb, UserRole};
+
+pub async fn list_users(pool: &PgPool) -> Vec<UserDb> {
+    let query_result = sqlx::query_as!(
+        UserDb,
+        r#"
+        select id, display_name, first_name, last_name, email, phone_number, user_role as "user_role: UserRole"
+        from raabta_user
+        "#
+    )
+    .fetch_all(pool)
+    .await;
+
+    match query_result {
+        Ok(rows) => rows,
+        Err(_) => vec![],
+    }
+}
 
 pub async fn insert_user(new_user: NewUser, pool: &PgPool) -> Result<PgQueryResult, Error> {
     sqlx::query!(

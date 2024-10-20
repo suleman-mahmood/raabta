@@ -11,32 +11,36 @@
   </button>
 </div>
 
-<div class="hero bg-base-200 min-h-screen">
+<div class="hero bg-base-200">
   <div class="hero-content">
     <!-- All users -->
     <div class="overflow-x-auto">
-      <table class="table table-xs table-pin-cols">
+      <table class="table table-xs table-pin-rows table-pin-cols">
         <thead>
           <tr>
+            <th>Display Name</th>
+            <th>Email</th>
+            <th>Phone number</th>
+            <th>User Role</th>
             <th></th>
-            <th>Name</th>
-            <th>Job</th>
-            <th>company</th>
-            <th>location</th>
-            <th>Last Login</th>
-            <th>Favorite Color</th>
           </tr>
         </thead>
         <tbody>
+          {% for user in users %}
           <tr>
-            <th>1</th>
-            <td>Cy Ganderton</td>
-            <td>Quality Control Specialist</td>
-            <td>Littel, Schaden and Vandervort</td>
-            <td>Canada</td>
-            <td>12/16/2020</td>
-            <td>Blue</td>
+            <td>{{ user.display_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              {% if let Some(phone_number) = user.phone_number %}
+                {{ phone_number }}
+              {% endif %}
+            </td>
+            <td>{{ user.user_role }}</td>
+            <td>
+              <button class="btn btn-ghost btn-xs">edit</button>
+            </td>
           </tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>

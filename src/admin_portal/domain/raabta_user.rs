@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use regex::Regex;
 use serde::Deserialize;
 use uuid::Uuid;
@@ -9,6 +11,16 @@ pub enum UserRole {
     Parent,
     Teacher,
     SchoolAdmin,
+}
+impl Display for UserRole {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            UserRole::Student => write!(f, "Student"),
+            UserRole::Parent => write!(f, "Parent"),
+            UserRole::Teacher => write!(f, "Teacher"),
+            UserRole::SchoolAdmin => write!(f, "School Admin"),
+        }
+    }
 }
 
 // enum RaabtaUser {
@@ -68,6 +80,16 @@ impl TryFrom<CreateUserFormData> for NewUser {
             user_role: UserRole::Student,
         })
     }
+}
+
+pub struct UserDb {
+    pub id: String,
+    pub display_name: String,
+    pub first_name: String,
+    pub last_name: String,
+    pub email: String,
+    pub phone_number: Option<String>,
+    pub user_role: UserRole,
 }
 
 pub struct NewUser {

@@ -2,15 +2,18 @@ use actix_web::{get, post, web, HttpResponse};
 use askama::Template;
 use sqlx::PgPool;
 
-use crate::admin_portal::{insert_user, CreateUserFormData};
+use crate::admin_portal::{insert_user, list_users, CreateUserFormData, UserDb};
 
 #[derive(Template)]
 #[template(path = "users.html")]
-struct UsersTemplate {}
+struct UsersTemplate<'a> {
+    users: &'a Vec<UserDb>,
+}
 
 #[get("")]
-async fn users() -> HttpResponse {
-    HttpResponse::Ok().body(UsersTemplate {}.render().unwrap())
+async fn users(pool: web::Data<PgPool>) -> HttpResponse {
+    let users = list_users(&pool).await;
+    HttpResponse::Ok().body(UsersTemplate { users: &users }.render().unwrap())
 }
 
 #[derive(Template)]
