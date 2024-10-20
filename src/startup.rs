@@ -5,6 +5,7 @@ use crate::admin_portal::{
 
 use std::net::TcpListener;
 
+use actix_files::Files;
 use actix_web::{
     body::MessageBody,
     dev::{Server, ServiceRequest, ServiceResponse},
@@ -45,6 +46,7 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
     let server = HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
+            .service(Files::new("/static", "./templates/static").prefer_utf8(true))
             .service(default)
             .service(health_check)
             .service(login)
