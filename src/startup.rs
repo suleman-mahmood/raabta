@@ -1,45 +1,18 @@
 use crate::admin_portal::{
-    announce, create_user, create_user_view, dashboard, default, health_check, login, submit_login,
-    users, Claims, UserRoleAdminPortal, JWT_SECRET,
+    announce, cookie_jwt_auth_middleware, create_user, create_user_view, dashboard, default,
+    health_check, login, submit_login, users,
 };
 
 use std::net::TcpListener;
 
 use actix_files::Files;
 use actix_web::{
-    body::MessageBody,
-    dev::{Server, ServiceRequest, ServiceResponse},
-    middleware::{from_fn, Logger, Next},
+    dev::Server,
+    middleware::{from_fn, Logger},
     web::{self},
-    App, Error, HttpServer,
+    App, HttpServer,
 };
-use jsonwebtoken::{decode, DecodingKey, Validation};
 use sqlx::PgPool;
-
-fn is_admin(req: &ServiceRequest) -> Option<bool> {
-    let jwt_token = req.cookie("token")?.value().to_string();
-    let user_role = decode::<Claims>(
-        jwt_token.as_str(),
-        &DecodingKey::from_secret(JWT_SECRET.to_string().as_ref()),
-        &Validation::default(),
-    )
-    .ok()?
-    .claims
-    .user_role;
-    match user_role {
-        UserRoleAdminPortal::Admin => Some(true),
-    }
-}
-
-async fn cookie_jwt_auth_middleware(
-    req: ServiceRequest,
-    next: Next<impl MessageBody>,
-) -> Result<ServiceResponse<impl MessageBody>, Error> {
-    match is_admin(&req) {
-        Some(true) => next.call(req).await,
-        _ => Err(actix_web::error::ErrorForbidden("Unauthorized")),
-    }
-}
 
 pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Error> {
     let db_pool = web::Data::new(db_pool);

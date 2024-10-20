@@ -1,13 +1,13 @@
-pub mod announcement;
-pub mod dashboard;
-pub mod default;
-pub mod health_check;
-pub mod login;
-pub mod user;
+pub mod announcement_route;
+pub mod dashboard_route;
+pub mod default_route;
+pub mod health_check_route;
+pub mod login_route;
+pub mod user_route;
 
-pub use announcement::*;
-pub use dashboard::*;
-pub use default::*;
-pub use health_check::*;
-pub use login::*;
-pub use user::*;
+pub use announcement_route::*;
+pub use dashboard_route::*;
+pub use default_route::*;
+pub use health_check_route::*;
+pub use login_route::*;
+pub use user_route::*;

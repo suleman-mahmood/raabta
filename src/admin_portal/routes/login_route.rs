@@ -1,12 +1,10 @@
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
-
 use actix_web::{get, post, web, HttpResponse};
 use askama::Template;
-use jsonwebtoken::{encode, EncodingKey, Header};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+
+use crate::admin_portal::{create_jwt_cookie, logout_cookie};
 
 // TODO: Move these to env or config
-pub const JWT_SECRET: &str = "secret_af";
 const ADMIN_EMAIL: &str = "admin@raabta.com";
 const ADMIN_PASS: &str = "root";
 
@@ -41,53 +39,10 @@ struct SubmitLoginFormData {
     password: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
-pub enum UserRoleAdminPortal {
-    Admin,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Claims {
-    exp: usize,
-    pub user_role: UserRoleAdminPortal,
-}
-
-fn logout_cookie() -> Option<(String, String)> {
-    Some((
-        "Set-Cookie".to_string(),
-        format!("token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; Path=/; SameSite=Strict;"),
-    ))
-}
-
-fn create_cookie() -> Option<(String, String)> {
-    let now = SystemTime::now().duration_since(UNIX_EPOCH).ok()?;
-    let thirty_mins = Duration::new(30 * 60, 0);
-    let token_expiry = usize::try_from(now.as_secs() + thirty_mins.as_secs()).ok()?;
-    let claims = Claims {
-        exp: token_expiry,
-        user_role: UserRoleAdminPortal::Admin,
-    };
-    let token = encode(
-        &Header::default(),
-        &claims,
-        &EncodingKey::from_secret(JWT_SECRET.to_string().as_ref()),
-    )
-    .ok()?;
-
-    Some((
-        "Set-Cookie".to_string(),
-        format!(
-            "token={}; Max-Age={}; Secure; HttpOnly; Path=/; SameSite=Strict;",
-            token,
-            thirty_mins.as_secs()
-        ),
-    ))
-}
-
 #[post("/submit-login")]
 async fn submit_login(body: web::Form<SubmitLoginFormData>) -> HttpResponse {
     if body.email == ADMIN_EMAIL && body.password == ADMIN_PASS {
-        if let Some(cookie) = create_cookie() {
+        if let Some(cookie) = create_jwt_cookie() {
             log::info!("Created a cookie successfully, {:?}", cookie);
             HttpResponse::Ok()
                 .insert_header(cookie)

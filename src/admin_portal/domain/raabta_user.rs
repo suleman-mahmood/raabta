@@ -40,6 +40,35 @@ pub enum UserRole {
 // }
 
 // impl RaabtaUser {}
+//
+
+#[derive(Debug, Deserialize)]
+pub struct CreateUserFormData {
+    first_name: String,
+    last_name: String,
+    user_email: String,
+    phone_number: String,
+}
+impl TryFrom<CreateUserFormData> for NewUser {
+    type Error = String;
+    fn try_from(value: CreateUserFormData) -> Result<Self, Self::Error> {
+        let first_name = UserName::parse(value.first_name)?;
+        let last_name = UserName::parse(value.last_name)?;
+        let display_name = DisplayName::parse(&first_name, &last_name);
+        let email = UserEmail::parse(value.user_email, &first_name);
+        let phone_number = UserPhoneNumber::parse(value.phone_number);
+
+        Ok(Self {
+            id: Uuid::new_v4(),
+            display_name,
+            first_name,
+            last_name,
+            email,
+            phone_number,
+            user_role: UserRole::Student,
+        })
+    }
+}
 
 pub struct NewUser {
     pub id: Uuid,
