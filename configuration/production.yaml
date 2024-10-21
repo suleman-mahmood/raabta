@@ -2,4 +2,4 @@ application:
   host: 0.0.0.0
 
 database:
-  host: 0.0.0.0
+  host: "raabta_postgres"
