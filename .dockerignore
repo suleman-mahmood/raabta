@@ -1,0 +1,9 @@
+.env
+Dockerfile
+README.md
+docker-compose.yml
+
+scripts/
+migrations/
+target/
+tests/
