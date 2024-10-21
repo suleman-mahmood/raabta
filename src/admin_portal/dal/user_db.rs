@@ -15,7 +15,10 @@ pub async fn list_users(pool: &PgPool) -> Vec<UserDb> {
 
     match query_result {
         Ok(rows) => rows,
-        Err(_) => vec![],
+        Err(e) => {
+            log::error!("Couldn't get user's list: {:?}", e);
+            vec![]
+        }
     }
 }
 
