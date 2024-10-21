@@ -7,7 +7,7 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.websecure.address=:443"
       - "--entryPoints.web.address=:80"
-      - "--entryPoints.tcp.address=:5432"
+      - "--entryPoints.dbsecure.address=:5432"
       - "--entryPoints.web.http.redirections.entrypoint.to=websecure"
       - "--entryPoints.web.http.redirections.entrypoint.scheme=https"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
@@ -46,7 +46,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.tcp.routers.raabta_postgres.rule=HostSNI(`suleman.dev`)"
-      - "traefik.tcp.routers.raabta_postgres.entrypoints=tcp"
+      - "traefik.tcp.routers.raabta_postgres.entrypoints=dbsecure"
+      - "traefik.tcp.routers.raabta_postgres.tls=true"
+      - "traefik.tcp.routers.raabta_postgres.tls.certresolver=myresolver"
       - "traefik.tcp.services.raabta_postgres.loadbalancer.server.port=5432"
 
 volumes:
