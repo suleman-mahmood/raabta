@@ -6,13 +6,13 @@ services:
       - "--providers.docker"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.websecure.address=:443"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.tcp.address=:5432"
+      - "--entryPoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entryPoints.web.http.redirections.entrypoint.scheme=https"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
       - "--certificatesresolvers.myresolver.acme.email=sulemanmahmood99@gmail.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      - "--entryPoints.web.address=:80"
-      - "--entryPoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entryPoints.web.http.redirections.entrypoint.scheme=https"
-      # - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
 
     ports:
       - "80:80"
@@ -29,9 +29,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.raabta_backend.rule=Host(`suleman.dev`)"
-      - "traefik.http.services.raabta_backend.loadbalancer.server.port=80"
       - "traefik.http.routers.raabta_backend.entrypoints=websecure"
       - "traefik.http.routers.raabta_backend.tls.certresolver=myresolver"
+      - "traefik.http.services.raabta_backend.loadbalancer.server.port=80"
 
   raabta_postgres:
     image: postgres:latest
@@ -42,6 +42,11 @@ services:
       POSTGRES_DB: raabta
     volumes:
       - raabta_pg_data:/var/lib/postgresql/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.raabta_postgres.rule=HostSNI(`suleman.dev`)"
+      - "traefik.tcp.routers.raabta_postgres.entrypoints=tcp"
+      - "traefik.tcp.services.raabta_postgres.loadbalancer.server.port=5432"
 
 volumes:
   raabta_pg_data:
