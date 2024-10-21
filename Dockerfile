@@ -24,5 +24,6 @@ RUN apt-get update -y \
 	&& rm -rf /var/lib/apt/lists/*
 COPY --from=builder /app/target/release/forge forge
 COPY configuration configuration
+COPY templates templates
 ENV APP_ENVIRONMENT=production
 ENTRYPOINT ["./forge"]
