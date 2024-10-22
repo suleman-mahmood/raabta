@@ -9,6 +9,7 @@
       <form
         class="card-body"
         hx-post="/user"
+        hx-target="#error-message"
       >
         <div class="form-control">
           <label class="label">
@@ -61,6 +62,8 @@
             ></span>
           </button>
         </div>
+
+        <div id="error-message"></div>
       </form>
     </div>
   </div>

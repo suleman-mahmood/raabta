@@ -105,11 +105,12 @@ pub struct NewUser {
 pub struct UserName(String);
 impl UserName {
     pub fn parse(s: String) -> Result<UserName, String> {
-        let is_empty_or_whitespace = s.trim().is_empty();
+        let s = s.trim();
+        let is_empty = s.is_empty();
         let is_too_long = s.len() > 64;
         let has_space = s.contains(" ");
 
-        if is_empty_or_whitespace || is_too_long || has_space {
+        if is_empty || is_too_long || has_space {
             Err(format!("{} is not a valid name", s))
         } else {
             let s = s.to_lowercase();
@@ -149,6 +150,7 @@ impl AsRef<str> for DisplayName {
 pub struct UserEmail(String);
 impl UserEmail {
     pub fn parse(email: String, first_name: &UserName) -> UserEmail {
+        let email = email.trim();
         let email_regex_result = Regex::new(
             r#"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"#,
         );
@@ -158,8 +160,8 @@ impl UserEmail {
             true => default_email,
             false => match email_regex_result {
                 Ok(email_regex) => {
-                    if email_regex.is_match(&email) {
-                        Self(email)
+                    if email_regex.is_match(email) {
+                        Self(email.to_string())
                     } else {
                         default_email
                     }
@@ -178,13 +180,14 @@ impl AsRef<str> for UserEmail {
 pub struct UserPhoneNumber(Option<String>);
 impl UserPhoneNumber {
     pub fn parse(phone_number: String) -> UserPhoneNumber {
+        let phone_number = phone_number.trim();
         let phone_regex_result = Regex::new(r"^\d{4}-\d{7}$");
         match phone_number.is_empty() {
             true => Self(None),
             false => match phone_regex_result {
                 Ok(phone_regex) => {
-                    if phone_regex.is_match(&phone_number) {
-                        Self(Some(phone_number))
+                    if phone_regex.is_match(phone_number) {
+                        Self(Some(phone_number.to_string()))
                     } else {
                         Self(None)
                     }
