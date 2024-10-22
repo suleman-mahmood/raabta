@@ -30,10 +30,14 @@ async fn create_user_view() -> HttpResponse {
 async fn create_user(body: web::Form<CreateUserFormData>, pool: web::Data<PgPool>) -> HttpResponse {
     let new_user = match body.0.try_into() {
         Ok(value) => value,
-        Err(_) => return HttpResponse::BadRequest().finish(),
+        Err(e) => {
+            log::error!("Couldn't parse user form data to domain type: {:?}", e);
+            return HttpResponse::BadRequest().finish();
+        }
     };
 
-    if user_db::insert_user(new_user, &pool).await.is_err() {
+    if let Err(e) = user_db::insert_user(new_user, &pool).await {
+        log::error!("Couldn't insert user into db: {:?}", e);
         return HttpResponse::BadRequest().finish();
     }
 
@@ -49,7 +53,8 @@ struct DeleteUserQuery {
 
 #[delete("")]
 async fn delete_user(pool: web::Data<PgPool>, query: web::Query<DeleteUserQuery>) -> HttpResponse {
-    if user_db::delete_user(&query.user_id, &pool).await.is_err() {
+    if let Err(e) = user_db::delete_user(&query.user_id, &pool).await {
+        log::error!("Couldn't insert user into db: {:?}", e);
         return HttpResponse::BadRequest().finish();
     }
 
