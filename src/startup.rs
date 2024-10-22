@@ -1,6 +1,6 @@
 use crate::admin_portal::{
-    announce, cookie_jwt_auth_middleware, create_user, create_user_view, dashboard, default,
-    health_check, login, submit_login, users,
+    announcement_route, cookie_jwt_auth_middleware, dashboard_route, default_route,
+    health_check_route, login_route, user_route,
 };
 
 use std::net::TcpListener;
@@ -20,21 +20,22 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
         App::new()
             .wrap(Logger::default())
             .service(Files::new("/static", "./templates/static").prefer_utf8(true))
-            .service(default)
-            .service(health_check)
-            .service(login)
-            .service(submit_login)
-            .service(announce)
+            .service(default_route::default)
+            .service(health_check_route::health_check)
+            .service(login_route::login)
+            .service(login_route::submit_login)
+            .service(announcement_route::announce)
             .service(
                 web::scope("/dashboard")
-                    .service(dashboard)
+                    .service(dashboard_route::dashboard)
                     .wrap(from_fn(cookie_jwt_auth_middleware)),
             )
             .service(
                 web::scope("/user")
-                    .service(users)
-                    .service(create_user)
-                    .service(create_user_view)
+                    .service(user_route::users)
+                    .service(user_route::create_user)
+                    .service(user_route::create_user_view)
+                    .service(user_route::delete_user)
                     .wrap(from_fn(cookie_jwt_auth_middleware)),
             )
             .app_data(db_pool.clone())

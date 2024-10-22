@@ -1,8 +1,9 @@
-use actix_web::{get, post, web, HttpResponse};
+use actix_web::{delete, get, post, web, HttpResponse};
 use askama::Template;
+use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::admin_portal::{insert_user, list_users, CreateUserFormData, UserDb};
+use crate::admin_portal::{user_db, CreateUserFormData, UserDb};
 
 #[derive(Template)]
 #[template(path = "users.html")]
@@ -12,7 +13,7 @@ struct UsersTemplate<'a> {
 
 #[get("")]
 async fn users(pool: web::Data<PgPool>) -> HttpResponse {
-    let users = list_users(&pool).await;
+    let users = user_db::list_users(&pool).await;
     HttpResponse::Ok().body(UsersTemplate { users: &users }.render().unwrap())
 }
 
@@ -32,11 +33,25 @@ async fn create_user(body: web::Form<CreateUserFormData>, pool: web::Data<PgPool
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
 
-    if insert_user(new_user, &pool).await.is_err() {
+    if user_db::insert_user(new_user, &pool).await.is_err() {
         return HttpResponse::BadRequest().finish();
     }
 
     HttpResponse::Ok()
         .insert_header(("HX-Location", "/user"))
         .body("Created User!")
+}
+
+#[derive(Deserialize)]
+struct DeleteUserQuery {
+    user_id: String,
+}
+
+#[delete("")]
+async fn delete_user(pool: web::Data<PgPool>, query: web::Query<DeleteUserQuery>) -> HttpResponse {
+    if user_db::delete_user(&query.user_id, &pool).await.is_err() {
+        return HttpResponse::BadRequest().finish();
+    }
+
+    HttpResponse::Ok().body("")
 }

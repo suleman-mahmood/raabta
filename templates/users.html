@@ -23,6 +23,7 @@
             <th>Phone number</th>
             <th>User Role</th>
             <th></th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -38,6 +39,17 @@
             <td>{{ user.user_role }}</td>
             <td>
               <button class="btn btn-ghost btn-xs">edit</button>
+            </td>
+            <td>
+              <button 
+                class="btn btn-error btn-xs btn-outline"
+                hx-delete="/user?user_id={{user.id}}"
+                hx-swap="outerHTML swap:1s"
+                hx-target="closest tr"
+                hx-confirm="Are you sure?"
+              >
+                delete
+              </button>
             </td>
           </tr>
           {% endfor %}
