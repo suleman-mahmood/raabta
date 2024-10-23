@@ -31,6 +31,7 @@ async fn create_user_view() -> HttpResponse {
 struct CreateUserErrorTemplate {
     error_message: String,
 }
+// something
 
 #[post("")]
 async fn create_user(body: web::Form<CreateUserFormData>, pool: web::Data<PgPool>) -> HttpResponse {
