@@ -1,14 +1,45 @@
 use sqlx::{postgres::PgQueryResult, PgPool};
 use uuid::Uuid;
 
-use crate::admin_portal::{NewUser, UserDb, UserRole};
+use crate::admin_portal::{CreateUser, UserDb, UserRole};
+
+pub async fn get_user(user_id: &str, pool: &PgPool) -> Result<UserDb, sqlx::Error> {
+    sqlx::query_as!(
+        UserDb,
+        r#"
+        select
+            id,
+            display_name,
+            first_name,
+            last_name,
+            email,
+            phone_number,
+            user_role as "user_role: UserRole"
+        from
+            raabta_user
+        where
+            id = $1
+        "#,
+        Uuid::parse_str(user_id).unwrap(),
+    )
+    .fetch_one(pool)
+    .await
+}
 
 pub async fn list_users(pool: &PgPool) -> Vec<UserDb> {
     let query_result = sqlx::query_as!(
         UserDb,
         r#"
-        select id, display_name, first_name, last_name, email, phone_number, user_role as "user_role: UserRole"
-        from raabta_user
+        select
+            id,
+            display_name,
+            first_name,
+            last_name,
+            email,
+            phone_number,
+            user_role as "user_role: UserRole"
+        from
+            raabta_user
         "#
     )
     .fetch_all(pool)
@@ -23,11 +54,22 @@ pub async fn list_users(pool: &PgPool) -> Vec<UserDb> {
     }
 }
 
-pub async fn insert_user(new_user: NewUser, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+pub async fn upsert_user(
+    new_user: CreateUser,
+    pool: &PgPool,
+) -> Result<PgQueryResult, sqlx::Error> {
     sqlx::query!(
         r#"
-        insert into raabta_user (id, display_name, first_name, last_name, email, phone_number, user_role)
-        values ($1, $2, $3, $4, $5, $6, $7)
+        insert into raabta_user
+            (id, display_name, first_name, last_name, email, phone_number, user_role)
+        values
+            ($1, $2, $3, $4, $5, $6, $7)
+        on conflict(id) do update set
+            display_name = $2,
+            first_name = $3,
+            last_name = $4,
+            email = $5,
+            phone_number = $6
         "#,
         new_user.id,
         new_user.display_name.as_ref(),
@@ -35,7 +77,7 @@ pub async fn insert_user(new_user: NewUser, pool: &PgPool) -> Result<PgQueryResu
         new_user.last_name.as_ref(),
         new_user.email.as_ref(),
         new_user.phone_number.as_ref().clone(),
-        &new_user.user_role as &UserRole,
+        &new_user.user_role as &UserRole, // Don't directly update this value
     )
     .execute(pool)
     .await
