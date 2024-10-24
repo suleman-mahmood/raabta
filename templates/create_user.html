@@ -41,18 +41,20 @@
             {% if let Some(u) = user %} value={{u.last_name}} {% endif %}
           />
         </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Display name</span>
-          </label>
-          <input
-            name="display_name"
-            placeholder="Display Name"
-            class="input input-bordered"
-            required
-            {% if let Some(u) = user %} value={{u.display_name}} {% endif %}
-          />
-        </div>
+        {% if !is_create %}
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Display name</span>
+            </label>
+            <input
+              name="display_name"
+              placeholder="Display Name"
+              class="input input-bordered"
+              required
+              {% if let Some(u) = user %} value={{u.display_name}} {% endif %}
+            />
+          </div>
+        {% endif %}
         <div class="form-control">
           <label class="label">
             <span class="label-text">Email (optional)</span>
