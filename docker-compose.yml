@@ -43,7 +43,7 @@ services:
       - raabta_pg_data:/var/lib/postgresql/data
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.raabta_postgres.rule=Host(`raabta_postgres.docker.localhost`)"
+      - "traefik.tcp.routers.raabta_postgres.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.raabta_postgres.entrypoints=pg"
       - "traefik.tcp.services.raabta_postgres.loadbalancer.server.port=5432"
 
