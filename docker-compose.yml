@@ -10,9 +10,12 @@ services:
       - "--entryPoints.dbsecure.address=:5432"
       - "--entryPoints.web.http.redirections.entrypoint.to=websecure"
       - "--entryPoints.web.http.redirections.entrypoint.scheme=https"
-      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.email=sulemanmahmood99@gmail.com"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.webresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.webresolver.acme.email=sulemanmahmood99@gmail.com"
+      - "--certificatesresolvers.webresolver.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.pgresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.pgresolver.acme.email=sulemanmahmood99@gmail.com"
+      - "--certificatesresolvers.pgresolver.acme.storage=/letsencrypt/acme.json"
 
     ports:
       - "80:80"
@@ -31,7 +34,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.raabta_backend.rule=Host(`suleman.dev`)"
       - "traefik.http.routers.raabta_backend.entrypoints=websecure"
-      - "traefik.http.routers.raabta_backend.tls.certresolver=myresolver"
+      - "traefik.http.routers.raabta_backend.tls.certresolver=webresolver"
       - "traefik.http.services.raabta_backend.loadbalancer.server.port=80"
 
   raabta_postgres:
@@ -48,7 +51,7 @@ services:
       - "traefik.tcp.routers.raabta_postgres.rule=HostSNI(`suleman.dev`)"
       - "traefik.tcp.routers.raabta_postgres.entrypoints=dbsecure"
       - "traefik.tcp.routers.raabta_postgres.tls=true"
-      - "traefik.tcp.routers.raabta_postgres.tls.certresolver=myresolver"
+      - "traefik.tcp.routers.raabta_postgres.tls.certresolver=pgresolver"
       - "traefik.tcp.services.raabta_postgres.loadbalancer.server.port=5432"
 
 volumes:
