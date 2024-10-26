@@ -54,35 +54,63 @@ pub async fn list_users(pool: &PgPool) -> Vec<UserDb> {
     }
 }
 
-pub async fn upsert_user(
+pub async fn insert_user(
     new_user: CreateUser,
     pool: &PgPool,
 ) -> Result<PgQueryResult, sqlx::Error> {
     sqlx::query!(
         r#"
         insert into raabta_user
-            (id, display_name, first_name, last_name, email, phone_number, user_role)
+            (id, public_id, display_name, first_name, last_name, email, phone_number, user_role)
         values
-            ($1, $2, $3, $4, $5, $6, $7)
-        on conflict(id) do update set
-            display_name = $2,
-            first_name = $3,
-            last_name = $4,
-            email = $5,
-            phone_number = $6
+            ($1, $2, $3, $4, $5, $6, $7, $8)
         "#,
         new_user.id,
+        new_user.public_id,
         new_user.display_name.as_ref(),
         new_user.first_name.as_ref(),
         new_user.last_name.as_ref(),
         new_user.email.as_ref(),
         new_user.phone_number.as_ref().clone(),
-        &new_user.user_role as &UserRole, // Don't directly update this value
+        &new_user.user_role as &UserRole,
+    )
+    .execute(pool)
+    .await?;
+
+    sqlx::query!(
+        r#"
+        insert into credentials
+            (raabta_user_id, plain_text_password)
+        values
+            ($1, $2)
+        "#,
+        new_user.id,
+        new_user.password,
     )
     .execute(pool)
     .await
 }
 
+pub async fn edit_user(new_user: CreateUser, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+    sqlx::query!(
+        r#"
+        update raabta_user set
+            display_name = $2,
+            first_name = $3,
+            last_name = $4,
+            phone_number = $5
+        where
+            id = $1
+        "#,
+        new_user.id,
+        new_user.display_name.as_ref(),
+        new_user.first_name.as_ref(),
+        new_user.last_name.as_ref(),
+        new_user.phone_number.as_ref().clone(),
+    )
+    .execute(pool)
+    .await
+}
 pub async fn delete_user(user_id: &str, pool: &PgPool) -> Result<PgQueryResult, String> {
     let user_id = Uuid::parse_str(user_id).map_err(|e| e.to_string())?;
     sqlx::query!(

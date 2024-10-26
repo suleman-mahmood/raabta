@@ -82,7 +82,7 @@ async fn edit_user(
         }
     };
 
-    if let Err(e) = user_db::upsert_user(new_user, &pool).await {
+    if let Err(e) = user_db::edit_user(new_user, &pool).await {
         log::error!("Couldn't insert user into db: {:?}", e);
         return HttpResponse::Ok().body(
             CreateUserErrorTemplate {
@@ -106,7 +106,7 @@ struct CreateUserErrorTemplate {
 
 #[post("")]
 async fn create_user(body: web::Form<CreateUserFormData>, pool: web::Data<PgPool>) -> HttpResponse {
-    let new_user: CreateUser = match body.0.try_into() {
+    let new_user_student: CreateUser = match body.0.try_into() {
         Ok(value) => value,
         Err(e) => {
             log::error!("Couldn't parse user form data to domain type: {:?}", e);
@@ -119,9 +119,20 @@ async fn create_user(body: web::Form<CreateUserFormData>, pool: web::Data<PgPool
             );
         }
     };
+    let new_user_parent = CreateUser::create_parent_data(&new_user_student);
 
-    if let Err(e) = user_db::upsert_user(new_user, &pool).await {
-        log::error!("Couldn't insert user into db: {:?}", e);
+    if let Err(e) = user_db::insert_user(new_user_student, &pool).await {
+        log::error!("Couldn't insert student user into db: {:?}", e);
+        return HttpResponse::Ok().body(
+            CreateUserErrorTemplate {
+                error_message: e.to_string(),
+            }
+            .render()
+            .unwrap(),
+        );
+    }
+    if let Err(e) = user_db::insert_user(new_user_parent, &pool).await {
+        log::error!("Couldn't insert parent user into db: {:?}", e);
         return HttpResponse::Ok().body(
             CreateUserErrorTemplate {
                 error_message: e.to_string(),

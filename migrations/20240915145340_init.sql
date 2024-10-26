@@ -7,10 +7,11 @@ create type UserRole as enum (
 
 CREATE TABLE raabta_user (
 	id uuid PRIMARY KEY,
+	public_id text not null unique,
 	display_name text not null,
 	first_name text not null,
 	last_name text not null,
-	email text not null,
+	email text not null unique,
 	phone_number text,
 	user_role UserRole not null,
 	created_at timestamptz not null default now(),
@@ -61,4 +62,11 @@ create table chat_member(
 	member_user_id uuid not null references raabta_user(id),
 
 	PRIMARY KEY(chat_id, member_user_id)
+);
+
+create table credentials (
+	raabta_user_id uuid not null references raabta_user(id),
+	plain_text_password text not null,
+
+	PRIMARY KEY(raabta_user_id)
 );
