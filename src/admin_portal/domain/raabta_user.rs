@@ -194,7 +194,7 @@ impl AsRef<str> for UserName {
 }
 impl Default for UserName {
     fn default() -> Self {
-        Self("".to_string())
+        Self("NA".to_string())
     }
 }
 
