@@ -1,11 +1,11 @@
 use sqlx::{postgres::PgQueryResult, PgPool};
 use uuid::Uuid;
 
-use crate::admin_portal::{CreateUser, UserDb, UserRole};
+use crate::admin_portal::{CreateUser, GetUserDb, UserRole};
 
-pub async fn get_user(user_id: &str, pool: &PgPool) -> Result<UserDb, sqlx::Error> {
+pub async fn get_user(user_id: &str, pool: &PgPool) -> Result<GetUserDb, sqlx::Error> {
     sqlx::query_as!(
-        UserDb,
+        GetUserDb,
         r#"
         select
             id,
@@ -24,9 +24,9 @@ pub async fn get_user(user_id: &str, pool: &PgPool) -> Result<UserDb, sqlx::Erro
     .await
 }
 
-pub async fn list_users(pool: &PgPool) -> Vec<UserDb> {
+pub async fn list_users(pool: &PgPool) -> Vec<GetUserDb> {
     let query_result = sqlx::query_as!(
-        UserDb,
+        GetUserDb,
         r#"
         select
             id,

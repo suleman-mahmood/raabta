@@ -1,6 +1,6 @@
 use super::UserRole;
 
-pub struct UserDb {
+pub struct GetUserDb {
     pub id: String,
     pub display_name: String,
     pub email: String,

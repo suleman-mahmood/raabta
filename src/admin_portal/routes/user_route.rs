@@ -3,12 +3,12 @@ use askama::Template;
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::admin_portal::{user_db, CreateUser, CreateUserFormData, EditUserFormData, UserDb};
+use crate::admin_portal::{user_db, CreateUser, CreateUserFormData, EditUserFormData, GetUserDb};
 
 #[derive(Template)]
 #[template(path = "users.html")]
 struct UsersTemplate<'a> {
-    users: &'a Vec<UserDb>,
+    users: &'a Vec<GetUserDb>,
 }
 
 #[get("")]
@@ -20,7 +20,7 @@ async fn users(pool: web::Data<PgPool>) -> HttpResponse {
 #[derive(Template)]
 #[template(path = "create_user.html")]
 struct CreateUserTemplate {
-    user: Option<UserDb>,
+    user: Option<GetUserDb>,
     is_create: bool,
 }
 
