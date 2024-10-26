@@ -30,3 +30,64 @@ impl TryFrom<CreateUserFormData> for CreateUser {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::admin_portal::{CreateUser, UserRole};
+
+    use super::CreateUserFormData;
+
+    #[test]
+    fn empty_phone_number_is_valid() {
+        let data = CreateUserFormData {
+            display_name: "Suleman Mahmood".to_string(),
+            phone_number: "".to_string(),
+        };
+
+        let result: Result<CreateUser, String> = data.try_into();
+        assert!(result.is_ok());
+
+        let result = result.unwrap();
+
+        assert_eq!(result.public_id.len(), 16);
+        assert_eq!(result.password.len(), 4);
+        assert_eq!(result.display_name.as_ref(), "Suleman Mahmood");
+        assert_eq!(result.email.as_ref(), "suleman@riveroaks.com");
+        assert_eq!(result.user_role, UserRole::Student);
+        assert!(result.phone_number.as_ref().is_none());
+    }
+
+    #[test]
+    fn empty_display_name_is_invalid() {
+        let data = CreateUserFormData {
+            display_name: "".to_string(),
+            phone_number: "0333-3462788".to_string(),
+        };
+
+        let result: Result<CreateUser, String> = data.try_into();
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn valid_data() {
+        let data = CreateUserFormData {
+            display_name: "Suleman Mahmood".to_string(),
+            phone_number: "0333-3462788".to_string(),
+        };
+
+        let result: Result<CreateUser, String> = data.try_into();
+        assert!(result.is_ok());
+
+        let result = result.unwrap();
+
+        assert_eq!(result.public_id.len(), 16);
+        assert_eq!(result.password.len(), 4);
+        assert_eq!(result.display_name.as_ref(), "Suleman Mahmood");
+        assert_eq!(result.email.as_ref(), "suleman@riveroaks.com");
+        assert_eq!(result.user_role, UserRole::Student);
+        assert_eq!(
+            result.phone_number.as_ref().clone().unwrap(),
+            "0333-3462788"
+        );
+    }
+}
