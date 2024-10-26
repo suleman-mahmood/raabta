@@ -19,51 +19,14 @@
       >
         <div class="form-control">
           <label class="label">
-            <span class="label-text">First Name</span>
+            <span class="label-text">Display name</span>
           </label>
           <input
-            name="first_name"
-            placeholder="First Name"
+            name="display_name"
+            placeholder="Display Name"
             class="input input-bordered"
             required
-            {% if let Some(u) = user %} value="{{u.first_name}}" {% endif %}
-          />
-        </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Last Name</span>
-          </label>
-          <input
-            name="last_name"
-            placeholder="Last Name"
-            class="input input-bordered"
-            required
-            {% if let Some(u) = user %} value="{{u.last_name}}" {% endif %}
-          />
-        </div>
-        {% if !is_create %}
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Display name</span>
-            </label>
-            <input
-              name="display_name"
-              placeholder="Display Name"
-              class="input input-bordered"
-              required
-              {% if let Some(u) = user %} value="{{u.display_name}}" {% endif %}
-            />
-          </div>
-        {% endif %}
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Email (optional)</span>
-          </label>
-          <input
-            name="user_email"
-            placeholder="Email"
-            class="input input-bordered"
-            {% if let Some(u) = user %} value="{{u.email}}" {% endif %}
+            {% if let Some(u) = user %} value="{{u.display_name}}" {% endif %}
           />
         </div>
         <div class="form-control">

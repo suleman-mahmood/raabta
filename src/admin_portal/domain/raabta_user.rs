@@ -56,18 +56,14 @@ impl Display for UserRole {
 
 #[derive(Debug, Deserialize)]
 pub struct CreateUserFormData {
-    first_name: String,
-    last_name: String,
-    user_email: String,
+    display_name: String,
     phone_number: String,
 }
 impl TryFrom<CreateUserFormData> for CreateUser {
     type Error = String;
     fn try_from(value: CreateUserFormData) -> Result<Self, Self::Error> {
-        let first_name = UserName::parse(value.first_name)?;
-        let last_name = UserName::parse(value.last_name)?;
-        let display_name = DisplayName::derive_from_name(&first_name, &last_name);
-        let email = UserEmail::create_or_derive(value.user_email, &first_name);
+        let display_name = DisplayName::parse(&value.display_name)?;
+        let email = UserEmail::derive_from_display_name(&display_name);
         let phone_number = UserPhoneNumber::parse(value.phone_number);
         let public_id = generate_public_id();
         let password = utils::generate_password();
@@ -77,8 +73,6 @@ impl TryFrom<CreateUserFormData> for CreateUser {
             public_id,
             password,
             display_name,
-            first_name,
-            last_name,
             email,
             phone_number,
             user_role: UserRole::Student,
@@ -88,18 +82,13 @@ impl TryFrom<CreateUserFormData> for CreateUser {
 
 #[derive(Debug, Deserialize)]
 pub struct EditUserFormData {
-    first_name: String,
-    last_name: String,
     display_name: String,
-    user_email: String,
     phone_number: String,
 }
 
 pub struct UserDb {
     pub id: String,
     pub display_name: String,
-    pub first_name: String,
-    pub last_name: String,
     pub email: String,
     pub phone_number: Option<String>,
     pub user_role: UserRole,
@@ -110,18 +99,13 @@ pub struct CreateUser {
     pub public_id: String,
     pub password: String,
     pub display_name: DisplayName,
-    pub first_name: UserName,
-    pub last_name: UserName,
     pub email: UserEmail,
     pub phone_number: UserPhoneNumber,
     pub user_role: UserRole,
 }
 impl CreateUser {
     pub fn parse_from_edit_data(new_data: EditUserFormData, id: &str) -> Result<Self, String> {
-        let first_name = UserName::parse(new_data.first_name)?;
-        let last_name = UserName::parse(new_data.last_name)?;
         let display_name = DisplayName::parse(&new_data.display_name)?;
-        let email = UserEmail::parse(new_data.user_email)?;
         let phone_number = UserPhoneNumber::parse_with_error(new_data.phone_number)?;
         let public_id = utils::generate_public_id();
         let id = Uuid::parse_str(id).map_err(|e| e.to_string())?;
@@ -130,9 +114,7 @@ impl CreateUser {
             id,
             public_id,
             display_name,
-            first_name,
-            last_name,
-            email,
+            email: UserEmail::default(),
             phone_number,
             password: "".to_string(), // Doesn't matter as we don't use it in our query
             user_role: UserRole::Student, // Doesn't matter as we don't use it in our query
@@ -151,8 +133,6 @@ impl CreateUser {
             public_id,
             password,
             display_name,
-            first_name: UserName::default(),
-            last_name: UserName::default(),
             email,
             phone_number: student_user.phone_number.clone(),
             user_role: UserRole::Parent,
@@ -200,17 +180,13 @@ impl Default for UserName {
 
 pub struct DisplayName(String);
 impl DisplayName {
-    pub fn derive_from_name(first_name: &UserName, last_name: &UserName) -> Self {
-        Self(format!("{} {}", first_name.0, last_name.0))
-    }
-
     pub fn derive_from_student(display_name: &Self) -> Self {
         Self(format!("{}'s Parent", display_name.0))
     }
 
     pub fn parse(display_name: &str) -> Result<Self, String> {
         let display_name = display_name.trim();
-        let display_name_regex_result = Regex::new(r#"^[\d \w]{3,50}$"#);
+        let display_name_regex_result = Regex::new(r#"^[\d '\w]{3,50}$"#);
         match display_name_regex_result {
             Ok(display_name_regex) => match display_name_regex.is_match(display_name) {
                 true => Ok(Self(display_name.to_string())),
@@ -238,26 +214,14 @@ impl UserEmail {
         Self(format!("{}.parent@{}", first_part, second_part))
     }
 
-    pub fn create_or_derive(email: String, first_name: &UserName) -> Self {
-        let email = email.trim();
-        let email_regex_result = Regex::new(
-            r#"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"#,
-        );
-        let default_email = Self(format!("{}@riveroaks.com", first_name.0.to_lowercase()));
-
-        match email.is_empty() {
-            true => default_email,
-            false => match email_regex_result {
-                Ok(email_regex) => {
-                    if email_regex.is_match(email) {
-                        Self(email.to_string())
-                    } else {
-                        default_email
-                    }
-                }
-                Err(_) => default_email,
-            },
-        }
+    pub fn derive_from_display_name(display_name: &DisplayName) -> Self {
+        // let String email;
+        // let email = email.trim();
+        // let email_regex_result = Regex::new(
+        //     r#"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"#,
+        // );
+        let first_word = display_name.0.split(" ").next().unwrap().to_lowercase();
+        Self(format!("{}@riveroaks.com", first_word))
     }
 
     pub fn parse(email: String) -> Result<Self, String> {
@@ -284,6 +248,11 @@ impl UserEmail {
 impl AsRef<str> for UserEmail {
     fn as_ref(&self) -> &str {
         &self.0
+    }
+}
+impl Default for UserEmail {
+    fn default() -> Self {
+        Self("random.user@raabta.com".to_string())
     }
 }
 

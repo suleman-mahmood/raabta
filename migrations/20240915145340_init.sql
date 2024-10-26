@@ -9,8 +9,6 @@ CREATE TABLE raabta_user (
 	id uuid PRIMARY KEY,
 	public_id text not null unique,
 	display_name text not null,
-	first_name text not null,
-	last_name text not null,
 	email text not null unique,
 	phone_number text,
 	user_role UserRole not null,
