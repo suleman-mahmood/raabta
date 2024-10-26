@@ -28,7 +28,7 @@ impl AsRef<str> for AnnouncerName {
 
 #[cfg(test)]
 mod tests {
-    use crate::domain::AnnouncerName;
+    use crate::admin_portal::AnnouncerName;
 
     #[test]
     fn a_256_length_name_is_valid() {
