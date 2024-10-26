@@ -37,8 +37,6 @@ impl Display for UserRole {
 //     last_name: String,
 //     email: String,
 //     phone_number: Option<String>,
-//     created_at: String,
-//     updated_at: String,
 // }
 
 // struct Student {
@@ -61,13 +59,13 @@ pub struct CreateUserFormData {
     user_email: String,
     phone_number: String,
 }
-impl TryFrom<CreateUserFormData> for NewUser {
+impl TryFrom<CreateUserFormData> for CreateUser {
     type Error = String;
     fn try_from(value: CreateUserFormData) -> Result<Self, Self::Error> {
         let first_name = UserName::parse(value.first_name)?;
         let last_name = UserName::parse(value.last_name)?;
-        let display_name = DisplayName::parse(&first_name, &last_name);
-        let email = UserEmail::parse(value.user_email, &first_name);
+        let display_name = DisplayName::derive_from_name(&first_name, &last_name);
+        let email = UserEmail::create_or_derive(value.user_email, &first_name);
         let phone_number = UserPhoneNumber::parse(value.phone_number);
 
         Ok(Self {
@@ -82,6 +80,15 @@ impl TryFrom<CreateUserFormData> for NewUser {
     }
 }
 
+#[derive(Debug, Deserialize)]
+pub struct EditUserFormData {
+    first_name: String,
+    last_name: String,
+    display_name: String,
+    user_email: String,
+    phone_number: String,
+}
+
 pub struct UserDb {
     pub id: String,
     pub display_name: String,
@@ -92,7 +99,7 @@ pub struct UserDb {
     pub user_role: UserRole,
 }
 
-pub struct NewUser {
+pub struct CreateUser {
     pub id: Uuid,
     pub display_name: DisplayName,
     pub first_name: UserName,
@@ -100,6 +107,25 @@ pub struct NewUser {
     pub email: UserEmail,
     pub phone_number: UserPhoneNumber,
     pub user_role: UserRole,
+}
+impl CreateUser {
+    pub fn parse_from_edit_data(new_data: EditUserFormData, id: &str) -> Result<Self, String> {
+        let first_name = UserName::parse(new_data.first_name)?;
+        let last_name = UserName::parse(new_data.last_name)?;
+        let display_name = DisplayName::parse(&new_data.display_name)?;
+        let email = UserEmail::parse(new_data.user_email)?;
+        let phone_number = UserPhoneNumber::parse_with_error(new_data.phone_number)?;
+
+        Ok(Self {
+            id: Uuid::parse_str(id).unwrap(),
+            display_name,
+            first_name,
+            last_name,
+            email,
+            phone_number,
+            user_role: UserRole::Student, // Doesn't matter as we don't use it in our query
+        })
+    }
 }
 
 pub struct UserName(String);
@@ -137,8 +163,23 @@ impl AsRef<str> for UserName {
 
 pub struct DisplayName(String);
 impl DisplayName {
-    pub fn parse(first_name: &UserName, last_name: &UserName) -> DisplayName {
+    pub fn derive_from_name(first_name: &UserName, last_name: &UserName) -> DisplayName {
         Self(format!("{} {}", first_name.0, last_name.0))
+    }
+
+    pub fn parse(display_name: &str) -> Result<DisplayName, String> {
+        let display_name = display_name.trim();
+        let display_name_regex_result = Regex::new(r#"^[\d \w]{3,50}$"#);
+        match display_name_regex_result {
+            Ok(display_name_regex) => match display_name_regex.is_match(display_name) {
+                true => Ok(Self(display_name.to_string())),
+                false => Err(format!(
+                    "Display name regex doesn't match for value: {}",
+                    display_name
+                )),
+            },
+            Err(e) => Err(e.to_string()),
+        }
     }
 }
 impl AsRef<str> for DisplayName {
@@ -149,7 +190,7 @@ impl AsRef<str> for DisplayName {
 
 pub struct UserEmail(String);
 impl UserEmail {
-    pub fn parse(email: String, first_name: &UserName) -> UserEmail {
+    pub fn create_or_derive(email: String, first_name: &UserName) -> UserEmail {
         let email = email.trim();
         let email_regex_result = Regex::new(
             r#"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"#,
@@ -167,6 +208,27 @@ impl UserEmail {
                     }
                 }
                 Err(_) => default_email,
+            },
+        }
+    }
+
+    pub fn parse(email: String) -> Result<UserEmail, String> {
+        let email = email.trim();
+        let email_regex_result = Regex::new(
+            r#"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"#,
+        );
+
+        match email.is_empty() {
+            true => Err(format!("Email passed is empty: {:?}", email)),
+            false => match email_regex_result {
+                Ok(email_regex) => {
+                    if email_regex.is_match(email) {
+                        Ok(Self(email.to_string()))
+                    } else {
+                        Err(format!("Email passed doesn't match regex: {:?}", email))
+                    }
+                }
+                Err(e) => Err(e.to_string()),
             },
         }
     }
@@ -193,6 +255,27 @@ impl UserPhoneNumber {
                     }
                 }
                 Err(_) => Self(None),
+            },
+        }
+    }
+
+    pub fn parse_with_error(phone_number: String) -> Result<UserPhoneNumber, String> {
+        let phone_number = phone_number.trim();
+        let phone_regex_result = Regex::new(r"^\d{4}-\d{7}$");
+        match phone_number.is_empty() {
+            true => Ok(Self(None)),
+            false => match phone_regex_result {
+                Ok(phone_regex) => {
+                    if phone_regex.is_match(phone_number) {
+                        Ok(Self(Some(phone_number.to_string())))
+                    } else {
+                        Err(format!(
+                            "Phone number {:?} doesn't pass regex check",
+                            phone_number
+                        ))
+                    }
+                }
+                Err(e) => Err(e.to_string()),
             },
         }
     }
