@@ -61,11 +61,12 @@ pub async fn insert_user(
     sqlx::query!(
         r#"
         insert into raabta_user
-            (id, display_name, first_name, last_name, email, phone_number, user_role)
+            (id, public_id, display_name, first_name, last_name, email, phone_number, user_role)
         values
-            ($1, $2, $3, $4, $5, $6, $7)
+            ($1, $2, $3, $4, $5, $6, $7, $8)
         "#,
         new_user.id,
+        new_user.public_id,
         new_user.display_name.as_ref(),
         new_user.first_name.as_ref(),
         new_user.last_name.as_ref(),
