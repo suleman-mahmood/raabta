@@ -8,17 +8,18 @@ pub async fn get_user(user_id: &str, pool: &PgPool) -> Result<GetUserDb, sqlx::E
         GetUserDb,
         r#"
         select
-            id,
+            public_id as id,
             display_name,
             email,
             phone_number,
+            archived,
             user_role as "user_role: UserRole"
         from
             raabta_user
         where
-            id = $1
+            public_id = $1
         "#,
-        Uuid::parse_str(user_id).unwrap(),
+        user_id,
     )
     .fetch_one(pool)
     .await
@@ -29,13 +30,16 @@ pub async fn list_users(pool: &PgPool) -> Vec<GetUserDb> {
         GetUserDb,
         r#"
         select
-            id,
+            public_id as id,
             display_name,
             email,
             phone_number,
+            archived,
             user_role as "user_role: UserRole"
         from
             raabta_user
+        order by
+            created_at
         "#
     )
     .fetch_all(pool)
@@ -85,16 +89,20 @@ pub async fn insert_user(
     .await
 }
 
-pub async fn edit_user(new_user: CreateUser, pool: &PgPool) -> Result<PgQueryResult, sqlx::Error> {
+pub async fn edit_user(
+    new_user: CreateUser,
+    user_id: &str,
+    pool: &PgPool,
+) -> Result<PgQueryResult, sqlx::Error> {
     sqlx::query!(
         r#"
         update raabta_user set
             display_name = $2,
             phone_number = $3
         where
-            id = $1
+            public_id = $1
         "#,
-        new_user.id,
+        user_id,
         new_user.display_name.as_ref(),
         new_user.phone_number.as_ref().clone(),
     )
@@ -121,15 +129,21 @@ pub async fn set_student_parent_id(
     .await
 }
 
-pub async fn delete_user(user_id: &str, pool: &PgPool) -> Result<PgQueryResult, String> {
-    let user_id = Uuid::parse_str(user_id).map_err(|e| e.to_string())?;
-    sqlx::query!(
+pub async fn toggle_archive_user(user_id: &str, pool: &PgPool) -> Result<bool, String> {
+    let result = sqlx::query!(
         r#"
-        delete from raabta_user where id = $1
+        update raabta_user set
+            archived = not archived
+        where
+            public_id = $1
+        returning
+            archived
         "#,
         user_id,
     )
-    .execute(pool)
+    .fetch_one(pool)
     .await
-    .map_err(|e| e.to_string())
+    .map_err(|e| e.to_string())?;
+
+    Ok(result.archived)
 }

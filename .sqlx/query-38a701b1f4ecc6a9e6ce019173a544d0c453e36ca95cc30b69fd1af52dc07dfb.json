@@ -1,12 +1,11 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        insert into raabta_user\n            (id, display_name, first_name, last_name, email, phone_number, user_role)\n        values\n            ($1, $2, $3, $4, $5, $6, $7)\n        ",
+  "query": "\n        insert into raabta_user\n            (id, public_id, display_name, email, phone_number, user_role)\n        values\n            ($1, $2, $3, $4, $5, $6)\n        ",
   "describe": {
     "columns": [],
     "parameters": {
       "Left": [
         "Uuid",
-        "Text",
         "Text",
         "Text",
         "Text",
@@ -28,5 +27,5 @@
     },
     "nullable": []
   },
-  "hash": "a5a0d447350d224f19cf3567f67a0b1488d750175f36c8770045ee38d954d394"
+  "hash": "38a701b1f4ecc6a9e6ce019173a544d0c453e36ca95cc30b69fd1af52dc07dfb"
 }

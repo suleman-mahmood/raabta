@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        update raabta_user set\n            display_name = $2,\n            phone_number = $3\n        where\n            public_id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f1314ee70a5beea00c20cf96d093040fe4687aa22060032820ac3366ae9bfc15"
+}

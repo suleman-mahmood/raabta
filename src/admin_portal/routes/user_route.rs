@@ -68,7 +68,7 @@ async fn edit_user(
     query: web::Query<EditUserQuery>,
     pool: web::Data<PgPool>,
 ) -> HttpResponse {
-    let new_user = match CreateUser::parse_from_edit_data(body.0, &query.user_id) {
+    let new_user = match CreateUser::parse_from_edit_data(body.0) {
         Ok(value) => value,
         Err(e) => {
             log::error!("Couldn't parse edit user form data to domain type: {:?}", e);
@@ -82,7 +82,7 @@ async fn edit_user(
         }
     };
 
-    if let Err(e) = user_db::edit_user(new_user, &pool).await {
+    if let Err(e) = user_db::edit_user(new_user, &query.user_id, &pool).await {
         log::error!("Couldn't insert user into db: {:?}", e);
         return HttpResponse::Ok().body(
             CreateUserErrorTemplate {
@@ -160,11 +160,18 @@ struct DeleteUserQuery {
 }
 
 #[delete("")]
-async fn delete_user(pool: web::Data<PgPool>, query: web::Query<DeleteUserQuery>) -> HttpResponse {
-    if let Err(e) = user_db::delete_user(&query.user_id, &pool).await {
-        log::error!("Couldn't insert user into db: {:?}", e);
-        return HttpResponse::BadRequest().finish();
+async fn toggle_archive_user(
+    pool: web::Data<PgPool>,
+    query: web::Query<DeleteUserQuery>,
+) -> HttpResponse {
+    match user_db::toggle_archive_user(&query.user_id, &pool).await {
+        Err(e) => {
+            log::error!("Couldn't archive user: {:?}", e);
+            HttpResponse::BadRequest().finish()
+        }
+        Ok(user_archived) => HttpResponse::Ok().body(match user_archived {
+            true => "Yes",
+            false => "No",
+        }),
     }
-
-    HttpResponse::Ok().body("")
 }

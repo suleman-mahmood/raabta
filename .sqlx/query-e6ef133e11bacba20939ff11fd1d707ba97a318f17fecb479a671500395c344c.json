@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        update raabta_user set\n            archived = not archived\n        where\n            public_id = $1\n        returning\n            archived\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "archived",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "e6ef133e11bacba20939ff11fd1d707ba97a318f17fecb479a671500395c344c"
+}

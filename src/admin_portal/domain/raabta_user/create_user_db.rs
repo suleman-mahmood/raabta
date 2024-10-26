@@ -14,14 +14,13 @@ pub struct CreateUser {
     pub user_role: UserRole,
 }
 impl CreateUser {
-    pub fn parse_from_edit_data(new_data: EditUserFormData, id: &str) -> Result<Self, String> {
+    pub fn parse_from_edit_data(new_data: EditUserFormData) -> Result<Self, String> {
         let display_name = DisplayName::parse(&new_data.display_name)?;
         let phone_number = UserPhoneNumber::parse_with_error(new_data.phone_number)?;
         let public_id = utils::generate_public_id();
-        let id = Uuid::parse_str(id).map_err(|e| e.to_string())?;
 
         Ok(Self {
-            id,
+            id: Uuid::new_v4(),
             public_id,
             display_name,
             email: UserEmail::default(),

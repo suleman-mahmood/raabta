@@ -22,6 +22,7 @@
             <th>Email</th>
             <th>Phone number</th>
             <th>User Role</th>
+            <th>Arhived?</th>
             <th></th>
             <th></th>
           </tr>
@@ -37,6 +38,7 @@
               {% endif %}
             </td>
             <td>{{ user.user_role }}</td>
+            <td id="archive-row{{user.id}}">{% if user.archived %} Yes {% else %} No {% endif %}</td>
             <td>
               <button 
                 class="btn btn-ghost btn-xs"
@@ -51,11 +53,10 @@
               <button 
                 class="btn btn-error btn-xs btn-outline"
                 hx-delete="/user?user_id={{user.id}}"
-                hx-swap="outerHTML swap:1s"
-                hx-target="closest tr"
+                hx-target="#archive-row{{user.id}}"
                 hx-confirm="Are you sure?"
               >
-                delete
+                Archive
               </button>
             </td>
           </tr>

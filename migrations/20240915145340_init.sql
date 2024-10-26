@@ -12,6 +12,7 @@ CREATE TABLE raabta_user (
 	email text not null unique,
 	phone_number text,
 	user_role UserRole not null,
+	archived bool not null default false,
 	created_at timestamptz not null default now(),
 	updated_at timestamptz not null default now(),
 

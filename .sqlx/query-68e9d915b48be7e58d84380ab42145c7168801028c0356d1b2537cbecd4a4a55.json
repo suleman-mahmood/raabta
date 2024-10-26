@@ -1,12 +1,12 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        select\n            id,\n            display_name,\n            first_name,\n            last_name,\n            email,\n            phone_number,\n            user_role as \"user_role: UserRole\"\n        from\n            raabta_user\n        where\n            id = $1\n        ",
+  "query": "\n        select\n            public_id as id,\n            display_name,\n            email,\n            phone_number,\n            archived,\n            user_role as \"user_role: UserRole\"\n        from\n            raabta_user\n        where\n            public_id = $1\n        ",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
         "name": "id",
-        "type_info": "Uuid"
+        "type_info": "Text"
       },
       {
         "ordinal": 1,
@@ -15,26 +15,21 @@
       },
       {
         "ordinal": 2,
-        "name": "first_name",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 3,
-        "name": "last_name",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 4,
         "name": "email",
         "type_info": "Text"
       },
       {
-        "ordinal": 5,
+        "ordinal": 3,
         "name": "phone_number",
         "type_info": "Text"
       },
       {
-        "ordinal": 6,
+        "ordinal": 4,
+        "name": "archived",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
         "name": "user_role: UserRole",
         "type_info": {
           "Custom": {
@@ -53,18 +48,17 @@
     ],
     "parameters": {
       "Left": [
-        "Uuid"
+        "Text"
       ]
     },
     "nullable": [
       false,
       false,
       false,
-      false,
-      false,
       true,
+      false,
       false
     ]
   },
-  "hash": "fb23a02e671eabc7a8aafce052197dc990baf149d4dcd06447c1fd7160df4912"
+  "hash": "68e9d915b48be7e58d84380ab42145c7168801028c0356d1b2537cbecd4a4a55"
 }

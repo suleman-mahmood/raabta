@@ -6,4 +6,5 @@ pub struct GetUserDb {
     pub email: String,
     pub phone_number: Option<String>,
     pub user_role: UserRole,
+    pub archived: bool,
 }

@@ -37,7 +37,7 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
                     .service(user_route::create_user_view)
                     .service(user_route::edit_user)
                     .service(user_route::edit_user_view)
-                    .service(user_route::delete_user)
+                    .service(user_route::toggle_archive_user)
                     .wrap(from_fn(cookie_jwt_auth_middleware)),
             )
             .app_data(db_pool.clone())
