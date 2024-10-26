@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        insert into credentials\n            (raabta_user_id, plain_text_password)\n        values\n            ($1, $2)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "32315effcbdbe9f8e7eaab2c4db3be825d52e3630e6b032d202498233038e0ff"
+}

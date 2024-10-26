@@ -4,6 +4,8 @@ use regex::Regex;
 use serde::Deserialize;
 use uuid::Uuid;
 
+use crate::admin_portal::utils::{self, generate_public_id};
+
 #[derive(Deserialize, sqlx::Type)]
 #[sqlx(type_name = "UserRole", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum UserRole {
@@ -67,9 +69,13 @@ impl TryFrom<CreateUserFormData> for CreateUser {
         let display_name = DisplayName::derive_from_name(&first_name, &last_name);
         let email = UserEmail::create_or_derive(value.user_email, &first_name);
         let phone_number = UserPhoneNumber::parse(value.phone_number);
+        let public_id = generate_public_id();
+        let password = utils::generate_password();
 
         Ok(Self {
             id: Uuid::new_v4(),
+            public_id,
+            password,
             display_name,
             first_name,
             last_name,
@@ -101,6 +107,8 @@ pub struct UserDb {
 
 pub struct CreateUser {
     pub id: Uuid,
+    pub public_id: String,
+    pub password: String,
     pub display_name: DisplayName,
     pub first_name: UserName,
     pub last_name: UserName,
@@ -115,16 +123,40 @@ impl CreateUser {
         let display_name = DisplayName::parse(&new_data.display_name)?;
         let email = UserEmail::parse(new_data.user_email)?;
         let phone_number = UserPhoneNumber::parse_with_error(new_data.phone_number)?;
+        let public_id = utils::generate_public_id();
+        let id = Uuid::parse_str(id).map_err(|e| e.to_string())?;
 
         Ok(Self {
-            id: Uuid::parse_str(id).unwrap(),
+            id,
+            public_id,
             display_name,
             first_name,
             last_name,
             email,
             phone_number,
+            password: "".to_string(), // Doesn't matter as we don't use it in our query
             user_role: UserRole::Student, // Doesn't matter as we don't use it in our query
         })
+    }
+
+    pub fn create_parent_data(student_user: &Self) -> Self {
+        let id = Uuid::new_v4();
+        let public_id = utils::generate_public_id();
+        let password = utils::generate_password();
+        let display_name = DisplayName::derive_from_student(&student_user.display_name);
+        let email = UserEmail::derive_from_student(&student_user.email);
+
+        Self {
+            id,
+            public_id,
+            password,
+            display_name,
+            first_name: UserName::default(),
+            last_name: UserName::default(),
+            email,
+            phone_number: student_user.phone_number.clone(),
+            user_role: UserRole::Parent,
+        }
     }
 }
 
@@ -160,14 +192,23 @@ impl AsRef<str> for UserName {
         &self.0
     }
 }
+impl Default for UserName {
+    fn default() -> Self {
+        Self("".to_string())
+    }
+}
 
 pub struct DisplayName(String);
 impl DisplayName {
-    pub fn derive_from_name(first_name: &UserName, last_name: &UserName) -> DisplayName {
+    pub fn derive_from_name(first_name: &UserName, last_name: &UserName) -> Self {
         Self(format!("{} {}", first_name.0, last_name.0))
     }
 
-    pub fn parse(display_name: &str) -> Result<DisplayName, String> {
+    pub fn derive_from_student(display_name: &Self) -> Self {
+        Self(format!("{}'s Parent", display_name.0))
+    }
+
+    pub fn parse(display_name: &str) -> Result<Self, String> {
         let display_name = display_name.trim();
         let display_name_regex_result = Regex::new(r#"^[\d \w]{3,50}$"#);
         match display_name_regex_result {
@@ -190,7 +231,14 @@ impl AsRef<str> for DisplayName {
 
 pub struct UserEmail(String);
 impl UserEmail {
-    pub fn create_or_derive(email: String, first_name: &UserName) -> UserEmail {
+    pub fn derive_from_student(email: &Self) -> Self {
+        let mut slice_iter = email.0.split("@");
+        let first_part = slice_iter.next().unwrap();
+        let second_part = slice_iter.next().unwrap();
+        Self(format!("{}.parent@{}", first_part, second_part))
+    }
+
+    pub fn create_or_derive(email: String, first_name: &UserName) -> Self {
         let email = email.trim();
         let email_regex_result = Regex::new(
             r#"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"#,
@@ -212,7 +260,7 @@ impl UserEmail {
         }
     }
 
-    pub fn parse(email: String) -> Result<UserEmail, String> {
+    pub fn parse(email: String) -> Result<Self, String> {
         let email = email.trim();
         let email_regex_result = Regex::new(
             r#"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"#,
@@ -239,6 +287,7 @@ impl AsRef<str> for UserEmail {
     }
 }
 
+#[derive(Clone)]
 pub struct UserPhoneNumber(Option<String>);
 impl UserPhoneNumber {
     pub fn parse(phone_number: String) -> UserPhoneNumber {
