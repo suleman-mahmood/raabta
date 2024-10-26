@@ -26,7 +26,7 @@
             placeholder="First Name"
             class="input input-bordered"
             required
-            {% if let Some(u) = user %} value={{u.first_name}} {% endif %}
+            {% if let Some(u) = user %} value="{{u.first_name}}" {% endif %}
           />
         </div>
         <div class="form-control">
@@ -38,7 +38,7 @@
             placeholder="Last Name"
             class="input input-bordered"
             required
-            {% if let Some(u) = user %} value={{u.last_name}} {% endif %}
+            {% if let Some(u) = user %} value="{{u.last_name}}" {% endif %}
           />
         </div>
         {% if !is_create %}
@@ -51,7 +51,7 @@
               placeholder="Display Name"
               class="input input-bordered"
               required
-              {% if let Some(u) = user %} value={{u.display_name}} {% endif %}
+              {% if let Some(u) = user %} value="{{u.display_name}}" {% endif %}
             />
           </div>
         {% endif %}
@@ -63,7 +63,7 @@
             name="user_email"
             placeholder="Email"
             class="input input-bordered"
-            {% if let Some(u) = user %} value={{u.email}} {% endif %}
+            {% if let Some(u) = user %} value="{{u.email}}" {% endif %}
           />
         </div>
         <div class="form-control">
@@ -75,7 +75,7 @@
             type="tel"
             placeholder="0333-3778899"
             class="input input-bordered"
-            {% if let Some(u) = user %} {% if let Some(ph) = u.phone_number %} value={{ph}} {% endif %} {% endif %}
+            {% if let Some(u) = user %} {% if let Some(ph) = u.phone_number %} value="{{ph}}" {% endif %} {% endif %}
           />
         </div>
         <div class="form-control mt-6">
