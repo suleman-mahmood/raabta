@@ -101,6 +101,26 @@ pub async fn edit_user(new_user: CreateUser, pool: &PgPool) -> Result<PgQueryRes
     .execute(pool)
     .await
 }
+
+pub async fn set_student_parent_id(
+    parent_id: Uuid,
+    student_id: Uuid,
+    pool: &PgPool,
+) -> Result<PgQueryResult, sqlx::Error> {
+    sqlx::query!(
+        r#"
+        update raabta_user set
+            parent_user_id = $2
+        where
+            id = $1
+        "#,
+        student_id,
+        parent_id,
+    )
+    .execute(pool)
+    .await
+}
+
 pub async fn delete_user(user_id: &str, pool: &PgPool) -> Result<PgQueryResult, String> {
     let user_id = Uuid::parse_str(user_id).map_err(|e| e.to_string())?;
     sqlx::query!(

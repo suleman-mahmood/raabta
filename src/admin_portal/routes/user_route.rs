@@ -121,6 +121,7 @@ async fn create_user(body: web::Form<CreateUserFormData>, pool: web::Data<PgPool
     };
     let new_user_parent = CreateUser::create_parent_data(&new_user_student);
 
+    let student_user_id = new_user_parent.id;
     if let Err(e) = user_db::insert_user(new_user_student, &pool).await {
         log::error!("Couldn't insert student user into db: {:?}", e);
         return HttpResponse::Ok().body(
@@ -131,15 +132,21 @@ async fn create_user(body: web::Form<CreateUserFormData>, pool: web::Data<PgPool
             .unwrap(),
         );
     }
-    if let Err(e) = user_db::insert_user(new_user_parent, &pool).await {
-        log::error!("Couldn't insert parent user into db: {:?}", e);
-        return HttpResponse::Ok().body(
-            CreateUserErrorTemplate {
-                error_message: e.to_string(),
-            }
-            .render()
-            .unwrap(),
-        );
+    let parent_user_id = new_user_parent.id;
+    match user_db::insert_user(new_user_parent, &pool).await {
+        Ok(_) => {
+            let _ = user_db::set_student_parent_id(student_user_id, parent_user_id, &pool).await;
+        }
+        Err(e) => {
+            log::error!("Couldn't insert parent user into db: {:?}", e);
+            return HttpResponse::Ok().body(
+                CreateUserErrorTemplate {
+                    error_message: e.to_string(),
+                }
+                .render()
+                .unwrap(),
+            );
+        }
     }
 
     HttpResponse::Ok()
