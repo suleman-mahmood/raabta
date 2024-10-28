@@ -47,6 +47,10 @@ impl CreateUser {
             user_role: UserRole::Parent,
         }
     }
+
+    pub fn regenerate_email(&mut self, index: u32) {
+        self.email.regenerate_email(index);
+    }
 }
 
 // enum RaabtaUser {

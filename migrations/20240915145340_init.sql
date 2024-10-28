@@ -69,3 +69,5 @@ create table credentials (
 
 	PRIMARY KEY(raabta_user_id)
 );
+
+create unique index raabta_user_email_unique on raabta_user (email) where (not archived);

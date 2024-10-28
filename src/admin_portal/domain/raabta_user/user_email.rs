@@ -41,6 +41,13 @@ impl UserEmail {
             },
         }
     }
+
+    pub fn regenerate_email(&mut self, index: u32) {
+        let mut splits = self.0.split("@");
+        let first_part = splits.next().unwrap();
+        let last_part = splits.next().unwrap();
+        self.0 = format!("{}{}@{}", first_part, index, last_part);
+    }
 }
 impl AsRef<str> for UserEmail {
     fn as_ref(&self) -> &str {

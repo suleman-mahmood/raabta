@@ -55,7 +55,7 @@ pub async fn list_users(pool: &PgPool) -> Vec<GetUserDb> {
 }
 
 pub async fn insert_user(
-    new_user: CreateUser,
+    new_user: &CreateUser,
     pool: &PgPool,
 ) -> Result<PgQueryResult, sqlx::Error> {
     sqlx::query!(

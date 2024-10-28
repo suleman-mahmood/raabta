@@ -54,6 +54,89 @@ async fn create_user_returns_200_for_valid_data() {
     );
 }
 // TODO: add tests for empty phone number
+//
+
+#[tokio::test]
+async fn create_user_common_email() {
+    // Arrange
+    let test_app = spawn_app().await;
+    let client = authenticate_user(&test_app.address).await;
+
+    let mut connection = PgConnection::connect_with(&test_app.config.database.with_db())
+        .await
+        .expect("Failed to connect to Postgres.");
+
+    let mut body = HashMap::new();
+    body.insert("display_name", "Luke Skywalker");
+    body.insert("phone_number", "0333-3452599");
+
+    // Act
+    let response = client
+        .post(format!("{}/user", test_app.address))
+        .form(&body)
+        .send()
+        .await
+        .expect("Failed to execute request.");
+    assert_eq!(200, response.status().as_u16());
+
+    let response = client
+        .post(format!("{}/user", test_app.address))
+        .form(&body)
+        .send()
+        .await
+        .expect("Failed to execute request.");
+    assert_eq!(200, response.status().as_u16());
+
+    let saved = sqlx::query!(
+        "select display_name, phone_number, email from raabta_user order by created_at"
+    )
+    .fetch_all(&mut connection)
+    .await
+    .expect("Failed to fetch newly inserted user");
+
+    // Assert
+    assert_eq!(saved.len(), 4);
+
+    assert_eq!(
+        saved.first().unwrap().display_name,
+        body.get("display_name").unwrap().to_string()
+    );
+    assert_eq!(
+        saved.first().unwrap().phone_number,
+        Some(body.get("phone_number").unwrap().to_string())
+    );
+    assert_eq!(saved.first().unwrap().email, "luke@riveroaks.com");
+
+    assert_eq!(
+        saved.get(1).unwrap().display_name,
+        body.get("display_name").unwrap().to_string() + "'s Parent"
+    );
+    assert_eq!(
+        saved.get(1).unwrap().phone_number,
+        Some(body.get("phone_number").unwrap().to_string())
+    );
+    assert_eq!(saved.get(1).unwrap().email, "luke.parent@riveroaks.com");
+
+    assert_eq!(
+        saved.get(2).unwrap().display_name,
+        body.get("display_name").unwrap().to_string()
+    );
+    assert_eq!(
+        saved.get(2).unwrap().phone_number,
+        Some(body.get("phone_number").unwrap().to_string())
+    );
+    assert_eq!(saved.get(2).unwrap().email, "luke1@riveroaks.com");
+
+    assert_eq!(
+        saved.last().unwrap().display_name,
+        body.get("display_name").unwrap().to_string() + "'s Parent"
+    );
+    assert_eq!(
+        saved.last().unwrap().phone_number,
+        Some(body.get("phone_number").unwrap().to_string())
+    );
+    assert_eq!(saved.last().unwrap().email, "luke1.parent@riveroaks.com");
+}
 
 #[tokio::test]
 async fn create_user_returns_400_data_missing() {
