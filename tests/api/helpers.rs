@@ -2,8 +2,9 @@ use forge::{
     configuration::{get_configuration, DatabaseSettings, Settings},
     startup::run,
 };
+use reqwest::Client;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
-use std::net::TcpListener;
+use std::{collections::HashMap, net::TcpListener};
 use uuid::Uuid;
 
 pub struct TestApp {
@@ -49,4 +50,24 @@ async fn configure_database(config: &DatabaseSettings) -> PgPool {
         .expect("Failed to migrate the database");
 
     connection_pool
+}
+
+pub async fn authenticate_user(test_app_address: &str) -> Client {
+    let client = reqwest::Client::builder()
+        .cookie_store(true)
+        .build()
+        .unwrap();
+
+    let mut body = HashMap::new();
+    body.insert("email", "admin@raabta.com");
+    body.insert("password", "root");
+
+    client
+        .post(format!("{}/submit-login", test_app_address))
+        .form(&body)
+        .send()
+        .await
+        .unwrap();
+
+    client
 }

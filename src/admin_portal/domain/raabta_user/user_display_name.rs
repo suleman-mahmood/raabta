@@ -9,15 +9,19 @@ impl DisplayName {
     pub fn parse(display_name: &str) -> Result<Self, String> {
         let display_name = display_name.trim();
         let display_name_regex_result = Regex::new(r#"^[\d '\w]{3,50}$"#);
-        match display_name_regex_result {
-            Ok(display_name_regex) => match display_name_regex.is_match(display_name) {
-                true => Ok(Self(display_name.to_string())),
-                false => Err(format!(
-                    "Display name regex doesn't match for value: {}",
-                    display_name
-                )),
+
+        match display_name.is_empty() {
+            false => match display_name_regex_result {
+                Ok(display_name_regex) => match display_name_regex.is_match(display_name) {
+                    true => Ok(Self(display_name.to_string())),
+                    false => Err(format!(
+                        "Display name regex doesn't match for value: {}",
+                        display_name
+                    )),
+                },
+                Err(e) => Err(e.to_string()),
             },
-            Err(e) => Err(e.to_string()),
+            true => Err("Display name is empty".to_string()),
         }
     }
 }
