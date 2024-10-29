@@ -51,12 +51,12 @@
             </td>
             <td>
               <button 
-                class="btn {% if user.archived %}btn-error{% else %}btn-warning{% endif %} btn-xs btn-outline"
+                class="btn {% if user.archived %}btn-warning{% else %}btn-error{% endif %} btn-xs btn-outline"
                 hx-delete="/user?user_id={{user.id}}"
                 hx-target="#archive-row{{user.id}}"
                 hx-confirm="Are you sure?"
               >
-                {% if user.archived %} Archive {% else %} Enable {% endif %}
+                {% if user.archived %} Enable {% else %} Archive {% endif %}
               </button>
             </td>
           </tr>
