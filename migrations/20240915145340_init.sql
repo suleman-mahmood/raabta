@@ -21,6 +21,7 @@ CREATE TABLE raabta_user (
 
 create table class (
 	id uuid PRIMARY KEY,
+	public_id text not null unique,
 	display_name text not null,
 	created_at timestamptz not null default now(),
 	updated_at timestamptz not null default now()
@@ -35,6 +36,7 @@ create table user_class (
 
 create table announcement (
 	id uuid PRIMARY KEY,
+	public_id text not null unique,
 	content text not null,
 	created_at timestamptz not null default now(),
 
@@ -44,6 +46,7 @@ create table announcement (
 
 create table chat (
 	id uuid PRIMARY KEY,
+	public_id text not null unique,
 	display_name text not null
 );
 
