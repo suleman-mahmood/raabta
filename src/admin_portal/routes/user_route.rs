@@ -3,7 +3,9 @@ use askama::Template;
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::admin_portal::{user_db, CreateUser, CreateUserFormData, EditUserFormData, GetUserDb};
+use crate::admin_portal::{
+    user_db, CreateUser, CreateUserFormData, EditUserFormData, GetUserDb, GetUserWithCredDb,
+};
 
 #[derive(Template)]
 #[template(path = "users.html")]
@@ -18,9 +20,28 @@ async fn users(pool: web::Data<PgPool>) -> HttpResponse {
 }
 
 #[derive(Template)]
+#[template(path = "view_user.html")]
+struct ViewUserTemplate<'a> {
+    user: &'a GetUserWithCredDb,
+}
+
+#[derive(Deserialize)]
+struct ViewUserQuery {
+    user_id: String,
+}
+
+#[get("/view")]
+async fn view_user(query: web::Query<ViewUserQuery>, pool: web::Data<PgPool>) -> HttpResponse {
+    match user_db::get_user(&query.user_id, &pool).await {
+        Ok(user) => HttpResponse::Ok().body(ViewUserTemplate { user: &user }.render().unwrap()),
+        Err(_) => HttpResponse::Ok().body("User not found"),
+    }
+}
+
+#[derive(Template)]
 #[template(path = "create_user.html")]
 struct CreateUserTemplate {
-    user: Option<GetUserDb>,
+    user: Option<GetUserWithCredDb>,
     is_create: bool,
 }
 

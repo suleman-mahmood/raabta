@@ -25,6 +25,7 @@
             <th>Arhived?</th>
             <th></th>
             <th></th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -39,6 +40,16 @@
             </td>
             <td>{{ user.user_role }}</td>
             <td id="archive-row{{user.id}}">{% if user.archived %} Yes {% else %} No {% endif %}</td>
+            <td>
+              <button 
+                class="btn btn-ghost btn-xs"
+                hx-get="/user/view?user_id={{user.id}}"
+                hx-target="body"
+                hx-push-url="true"
+              >
+                view
+              </button>
+            </td>
             <td>
               <button 
                 class="btn btn-ghost btn-xs"

@@ -1,0 +1,25 @@
+{% extends "layout.html" %} {% block content %} {% include "navbar.html" %}
+
+<div class="hero bg-base-200">
+  <div class="hero-content text-center">
+    <div class="max-w-md">
+      <h1 class="mb-8 text-4xl font-bold">User details</h1>
+
+      <p>Display Name: {{ user.display_name }}</p>
+
+      <p>Email: {{ user.email }}</p>
+
+      <p>Password: {{ user.password }}</p>
+
+      <p>Phone number: {% if let Some(phone_number) = user.phone_number %} {{ phone_number }} {% else %} Not provided {% endif %}</p>
+
+      <p>User Role: {{ user.user_role }}</p>
+
+      <p>Archived? {{ user.archived }}</p>
+
+      <button class="mt-8 btn btn-primary" onclick="history.back()">Back</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

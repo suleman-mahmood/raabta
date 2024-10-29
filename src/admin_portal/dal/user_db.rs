@@ -1,11 +1,11 @@
 use sqlx::{postgres::PgQueryResult, PgPool};
 use uuid::Uuid;
 
-use crate::admin_portal::{CreateUser, GetUserDb, UserRole};
+use crate::admin_portal::{CreateUser, GetUserDb, GetUserWithCredDb, UserRole};
 
-pub async fn get_user(user_id: &str, pool: &PgPool) -> Result<GetUserDb, sqlx::Error> {
+pub async fn get_user(user_id: &str, pool: &PgPool) -> Result<GetUserWithCredDb, sqlx::Error> {
     sqlx::query_as!(
-        GetUserDb,
+        GetUserWithCredDb,
         r#"
         select
             public_id as id,
@@ -13,9 +13,11 @@ pub async fn get_user(user_id: &str, pool: &PgPool) -> Result<GetUserDb, sqlx::E
             email,
             phone_number,
             archived,
-            user_role as "user_role: UserRole"
+            user_role as "user_role: UserRole",
+            c.plain_text_password as password
         from
-            raabta_user
+            raabta_user ru
+            join credentials c on c.raabta_user_id = ru.id
         where
             public_id = $1
         "#,
