@@ -13,48 +13,78 @@ async fn create_user_returns_200_for_valid_data() {
     let mut connection = PgConnection::connect_with(&test_app.config.database.with_db())
         .await
         .expect("Failed to connect to Postgres.");
-
-    let mut body = HashMap::new();
-    body.insert("display_name", "Luke Skywalker");
-    body.insert("phone_number", "0333-3452599");
+    let test_cases = vec![
+        (
+            HashMap::from([
+                ("display_name", "Luke Skywalker"),
+                ("phone_number", "0333-3452599"),
+            ]),
+            "valid data",
+        ),
+        (
+            HashMap::from([("display_name", "Luke Skywalker"), ("phone_number", "")]),
+            "Phone number is absent",
+        ),
+    ];
 
     // Act
-    let response = client
-        .post(format!("{}/user", test_app.address))
-        .form(&body)
-        .send()
-        .await
-        .expect("Failed to execute request.");
+    for (body, error_message) in &test_cases {
+        let response = client
+            .post(format!("{}/user", test_app.address))
+            .form(body)
+            .send()
+            .await
+            .expect("Failed to execute request.");
 
+        // Assert
+        assert_eq!(200, response.status().as_u16(), "{}", error_message);
+    }
     let saved =
         sqlx::query!("select display_name, phone_number from raabta_user order by created_at")
             .fetch_all(&mut connection)
             .await
             .expect("Failed to fetch newly inserted user");
+    assert_eq!(saved.len(), 4, "Fetched rows don't match expected count");
+    let mut rows_iter = saved.iter();
 
-    // Assert
-    assert_eq!(200, response.status().as_u16());
+    for (body, error_message) in test_cases {
+        let curr_row = rows_iter.next();
+        assert_eq!(
+            curr_row.unwrap().display_name,
+            body.get("display_name").unwrap().to_string(),
+            "{}",
+            error_message,
+        );
 
-    assert_eq!(saved.len(), 2);
-    assert_eq!(
-        saved.first().unwrap().display_name,
-        body.get("display_name").unwrap().to_string()
-    );
-    assert_eq!(
-        saved.first().unwrap().phone_number,
-        Some(body.get("phone_number").unwrap().to_string())
-    );
-    assert_eq!(
-        saved.last().unwrap().display_name,
-        body.get("display_name").unwrap().to_string() + "'s Parent"
-    );
-    assert_eq!(
-        saved.last().unwrap().phone_number,
-        Some(body.get("phone_number").unwrap().to_string())
-    );
+        assert_eq!(
+            curr_row.unwrap().phone_number,
+            if body.get("phone_number").unwrap().is_empty() {
+                None
+            } else {
+                Some(body.get("phone_number").unwrap().to_string())
+            },
+            "{}",
+            error_message,
+        );
+        let curr_row = rows_iter.next();
+        assert_eq!(
+            curr_row.unwrap().display_name,
+            body.get("display_name").unwrap().to_string() + "'s Parent",
+            "{}",
+            error_message,
+        );
+        assert_eq!(
+            curr_row.unwrap().phone_number,
+            if body.get("phone_number").unwrap().is_empty() {
+                None
+            } else {
+                Some(body.get("phone_number").unwrap().to_string())
+            },
+            "{}",
+            error_message,
+        );
+    }
 }
-// TODO: add tests for empty phone number
-//
 
 #[tokio::test]
 async fn create_user_common_email() {
