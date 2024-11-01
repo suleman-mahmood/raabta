@@ -18,11 +18,16 @@ async fn create_user_returns_200_for_valid_data() {
             HashMap::from([
                 ("display_name", "Luke Skywalker"),
                 ("phone_number", "0333-3452599"),
+                ("radio_user_type", "student-parent"),
             ]),
             "valid data",
         ),
         (
-            HashMap::from([("display_name", "Luke Skywalker"), ("phone_number", "")]),
+            HashMap::from([
+                ("display_name", "Luke Skywalker"),
+                ("phone_number", ""),
+                ("radio_user_type", "student-parent"),
+            ]),
             "Phone number is absent",
         ),
     ];
@@ -99,6 +104,7 @@ async fn create_user_common_email() {
     let mut body = HashMap::new();
     body.insert("display_name", "Luke Skywalker");
     body.insert("phone_number", "0333-3452599");
+    body.insert("radio_user_type", "student-parent");
 
     // Act
     let response = client
@@ -176,14 +182,27 @@ async fn create_user_returns_400_data_missing() {
 
     let test_cases = vec![
         (
-            HashMap::from([("display_name", "Angelie")]),
+            HashMap::from([
+                ("display_name", "Angelie"),
+                ("radio_user_type", "student-parent"),
+            ]),
             "Missing phone_number",
         ),
         (
-            HashMap::from([("phone_number", "0333-3787822")]),
+            HashMap::from([
+                ("phone_number", "0333-3787822"),
+                ("radio_user_type", "student-parent"),
+            ]),
             "Missing display name",
         ),
-        (HashMap::new(), "Missing both"),
+        (
+            HashMap::from([
+                ("display_name", "Angelie"),
+                ("phone_number", "0333-3787822"),
+            ]),
+            "Missing radio user type",
+        ),
+        (HashMap::new(), "Missing all"),
     ];
 
     // Act
@@ -206,11 +225,27 @@ async fn create_user_returns_200_with_err_msg_when_fields_are_present_but_empty(
     let client = authenticate_user(&test_app.address).await;
     let test_cases = vec![
         (
-            HashMap::from([("display_name", ""), ("phone_number", "0333-3888866")]),
+            HashMap::from([
+                ("display_name", ""),
+                ("phone_number", "0333-3888866"),
+                ("radio_user_type", "student-parent"),
+            ]),
             "Display name is empty",
         ),
         (
-            HashMap::from([("display_name", ""), ("phone_number", "")]),
+            HashMap::from([
+                ("display_name", ""),
+                ("phone_number", ""),
+                ("radio_user_type", "student-parent"),
+            ]),
+            "Display name is empty",
+        ),
+        (
+            HashMap::from([
+                ("display_name", ""),
+                ("phone_number", ""),
+                ("radio_user_type", ""),
+            ]),
             "Display name is empty",
         ),
     ];

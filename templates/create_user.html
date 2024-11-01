@@ -51,6 +51,20 @@
             {% if let Some(u) = user %} {% if let Some(ph) = u.phone_number %} value="{{ph}}" {% endif %} {% endif %}
           />
         </div>
+
+        <div class="form-control">
+          <label class="label cursor-pointer">
+            <span class="label-text">Student with parent</span>
+            <input type="radio" name="radio_user_type" value="student-parent" class="radio checked:bg-red-500" checked="checked" />
+          </label>
+        </div>
+        <div class="form-control">
+          <label class="label cursor-pointer">
+            <span class="label-text">Teacher</span>
+            <input type="radio" name="radio_user_type" value="teacher" class="radio checked:bg-blue-500" />
+          </label>
+        </div>
+
         <div class="form-control mt-6">
           <button class="btn btn-primary">
             {% if is_create %}
