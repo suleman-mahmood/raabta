@@ -1,5 +1,5 @@
 use crate::admin_portal::{
-    announcement_route, cookie_jwt_auth_middleware, dashboard_route, default_route,
+    announcement_route, class_route, cookie_jwt_auth_middleware, dashboard_route, default_route,
     health_check_route, login_route, user_route,
 };
 
@@ -40,6 +40,11 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
                     .service(user_route::edit_user)
                     .service(user_route::edit_user_view)
                     .service(user_route::toggle_archive_user)
+                    .wrap(from_fn(cookie_jwt_auth_middleware)),
+            )
+            .service(
+                web::scope("/class")
+                    .service(class_route::list_classes_view)
                     .wrap(from_fn(cookie_jwt_auth_middleware)),
             )
             .app_data(db_pool.clone())

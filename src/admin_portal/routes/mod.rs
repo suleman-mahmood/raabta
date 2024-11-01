@@ -1,4 +1,5 @@
 pub mod announcement_route;
+pub mod class_route;
 pub mod dashboard_route;
 pub mod default_route;
 pub mod health_check_route;

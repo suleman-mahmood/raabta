@@ -28,7 +28,7 @@ pub async fn get_user(user_id: &str, pool: &PgPool) -> Result<GetUserWithCredDb,
 }
 
 pub async fn list_users(pool: &PgPool) -> Vec<GetUserDb> {
-    let query_result = sqlx::query_as!(
+    sqlx::query_as!(
         GetUserDb,
         r#"
         select
@@ -45,15 +45,8 @@ pub async fn list_users(pool: &PgPool) -> Vec<GetUserDb> {
         "#
     )
     .fetch_all(pool)
-    .await;
-
-    match query_result {
-        Ok(rows) => rows,
-        Err(e) => {
-            log::error!("Couldn't get user's list: {:?}", e);
-            vec![]
-        }
-    }
+    .await
+    .unwrap_or(vec![])
 }
 
 pub async fn insert_user(
