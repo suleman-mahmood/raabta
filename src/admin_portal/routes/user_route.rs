@@ -1,10 +1,12 @@
+use actix_multipart::form::{tempfile::TempFile, MultipartForm};
 use actix_web::{delete, get, patch, post, web, HttpResponse};
 use askama::Template;
 use serde::Deserialize;
 use sqlx::PgPool;
 
 use crate::admin_portal::{
-    user_db, CreateUser, CreateUserFormData, EditUserFormData, GetUserDb, GetUserWithCredDb,
+    commands, user_db, CreateUser, CreateUserFormData, EditUserFormData, GetUserDb,
+    GetUserWithCredDb,
 };
 
 #[derive(Template)]
@@ -127,78 +129,48 @@ struct CreateUserErrorTemplate {
 
 #[post("")]
 async fn create_user(body: web::Form<CreateUserFormData>, pool: web::Data<PgPool>) -> HttpResponse {
-    let mut new_user_student: CreateUser = match body.0.try_into() {
-        Ok(value) => value,
+    match commands::create_user(body.0, &pool).await {
+        Ok(_) => HttpResponse::Ok()
+            .insert_header(("HX-Location", "/user"))
+            .body("Created User!"),
+
         Err(e) => {
-            log::error!("Couldn't parse user form data to domain type: {:?}", e);
-            return HttpResponse::Ok().body(
+            log::error!("Unable to create user from command: {:?}", e);
+            HttpResponse::Ok().body(
                 CreateUserErrorTemplate {
                     error_message: e.to_string(),
                 }
                 .render()
                 .unwrap(),
-            );
-        }
-    };
-
-    let mut student_inserted = false;
-    for i in 1..=9 {
-        let insert_user_result = user_db::insert_user(&new_user_student, &pool).await;
-        match insert_user_result {
-            Ok(_) => {
-                student_inserted = true;
-                break;
-            }
-            Err(e) => {
-                if e.as_database_error().unwrap().is_unique_violation() {
-                    new_user_student.regenerate_email(i);
-                    continue;
-                }
-                log::error!("Couldn't insert student user into db: {:?}", e);
-                return HttpResponse::Ok().body(
-                    CreateUserErrorTemplate {
-                        error_message: e.to_string(),
-                    }
-                    .render()
-                    .unwrap(),
-                );
-            }
+            )
         }
     }
-    if !student_inserted {
-        log::error!("Couldn't insert student user into db because of non unique email");
-        return HttpResponse::Ok().body(
-            CreateUserErrorTemplate {
-                error_message: "Choose a different first word in display name".to_string(),
-            }
-            .render()
-            .unwrap(),
-        );
-    }
+}
 
-    let new_user_parent = CreateUser::create_parent_data(&new_user_student);
-    let student_user_id = new_user_student.id;
-    let parent_user_id = new_user_parent.id;
+#[derive(MultipartForm)]
+struct CreateUserBulkForm {
+    #[multipart(limit = "100MB")]
+    file: TempFile,
+}
 
-    match user_db::insert_user(&new_user_parent, &pool).await {
-        Ok(_) => {
-            let _ = user_db::set_student_parent_id(parent_user_id, student_user_id, &pool).await;
-        }
-        Err(e) => {
-            log::error!("Couldn't insert parent user into db: {:?}", e);
-            return HttpResponse::Ok().body(
-                CreateUserErrorTemplate {
-                    error_message: e.to_string(),
-                }
-                .render()
-                .unwrap(),
-            );
+#[post("/create-bulk")]
+async fn create_user_bulk(
+    MultipartForm(form): MultipartForm<CreateUserBulkForm>,
+    pool: web::Data<PgPool>,
+) -> HttpResponse {
+    let rdr = csv::Reader::from_path(form.file.file.path()).unwrap();
+    for record in rdr.into_records() {
+        let record = record.unwrap();
+        let record: CreateUserFormData = record.deserialize(None).unwrap();
+
+        if let Err(e) = commands::create_user(record, &pool).await {
+            log::error!("Unable to create user from command: {:?}", e);
         }
     }
 
     HttpResponse::Ok()
         .insert_header(("HX-Location", "/user"))
-        .body("Created User!")
+        .body("")
 }
 
 #[derive(Deserialize)]

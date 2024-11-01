@@ -13,6 +13,7 @@ name= "forge"
 [dependencies]
 actix-web = "4"
 actix-files = "0.6"
+actix-multipart = "0.7"
 askama = "0.12.1"
 config = "0.14"
 env_logger = "0.11.5"
@@ -24,6 +25,7 @@ tokio = {version="1", features=["macros", "rt-multi-thread"]}
 uuid = {version="1", features=["v4"]}
 jsonwebtoken = {version = "9"}
 regex = "1"
+csv = "1.3"
 
 [dependencies.sqlx]
 version = "0.8"

@@ -2,7 +2,17 @@
 
 {% include "navbar.html" %}
 
-<div class="hero bg-base-200 min-h-screen">
+
+<div class="w-full flex flex-col content-center justify-center items-center bg-base-200">
+  <form class="my-4" hx-encoding='multipart/form-data' hx-post='/user/create-bulk'>
+    <input type='file' name='file'>
+    <button class="btn btn-primary">
+      Bulk create users (csv)
+    </button>
+  </form>
+</div>
+
+<div class="hero bg-base-200">
   <div class="hero-content">
     <div class="flex flex-col card bg-base-100 w-full">
       <!-- Create user form -->

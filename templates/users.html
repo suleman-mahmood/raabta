@@ -1,8 +1,8 @@
 {% extends "layout.html" %} {% block content %} {% include "navbar.html" %}
 
-<div class="w-full flex bg-base-200">
+<div class="w-full flex flex-col content-center justify-center items-center bg-base-200">
   <button
-    class="btn btn-primary mx-auto my-4"
+    class="mt-4 btn btn-primary"
     hx-get="/user/create"
     hx-target="body"
     hx-push-url="true"
