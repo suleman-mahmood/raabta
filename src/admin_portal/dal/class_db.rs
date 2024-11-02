@@ -22,7 +22,19 @@ pub async fn create_class(
     class: CreateClassDb,
     pool: &PgPool,
 ) -> Result<PgQueryResult, sqlx::Error> {
-    todo!();
+    sqlx::query!(
+        r#"
+        insert into class
+            (id, public_id, display_name)
+        values
+            ($1, $2, $3)
+        "#,
+        class.id,
+        class.public_id,
+        class.display_name.as_ref(),
+    )
+    .execute(pool)
+    .await
 }
 
 pub async fn get_class(class_id: &str, pool: &PgPool) -> Result<GetClassDb, sqlx::Error> {
