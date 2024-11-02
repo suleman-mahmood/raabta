@@ -29,7 +29,7 @@ async fn create_class_view() -> HttpResponse {
     HttpResponse::Ok().body(
         CreateClassViewTemplate {
             class: None,
-            is_create: false,
+            is_create: true,
         }
         .render()
         .unwrap(),

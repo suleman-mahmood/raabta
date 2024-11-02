@@ -44,7 +44,12 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
             )
             .service(
                 web::scope("/class")
+                    .service(class_route::create_class_view)
+                    .service(class_route::create_class)
                     .service(class_route::list_classes_view)
+                    .service(class_route::view_class)
+                    .service(class_route::edit_class)
+                    .service(class_route::edit_class_view)
                     .wrap(from_fn(cookie_jwt_auth_middleware)),
             )
             .app_data(db_pool.clone())

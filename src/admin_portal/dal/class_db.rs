@@ -11,6 +11,8 @@ pub async fn list_classes(pool: &PgPool) -> Vec<GetClassDb> {
             display_name
         from
             class
+        order by
+            created_at
         "#
     )
     .fetch_all(pool)
