@@ -68,8 +68,7 @@ pub async fn edit_class(
         public_id = $1
     "#,
         class_id,
-        // class.display_name.as_ref(),
-        "dkjsfk"
+        class.display_name.as_ref(),
     )
     .execute(pool)
     .await
