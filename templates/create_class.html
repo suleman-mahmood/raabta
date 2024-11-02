@@ -1,0 +1,52 @@
+{% extends "layout.html" %} {% block content %}
+
+{% include "navbar.html" %}
+
+
+<div class="hero bg-base-200">
+  <div class="hero-content">
+    <div class="flex flex-col card bg-base-100 w-full">
+      <!-- Create class form -->
+      <form
+        class="card-body"
+        {% if is_create %}
+          hx-post="/class"
+        {% else %}
+          {% if let Some(class) = class %}
+            hx-patch="/class?class_id={{class.id}}" 
+          {% endif %}
+        {% endif %}
+        hx-target="#error-message"
+      >
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Display name</span>
+          </label>
+          <input
+            name="display_name"
+            placeholder="Display Name"
+            class="input input-bordered"
+            required
+            {% if let Some(c) = class %} value="{{c.display_name}}" {% endif %}
+          />
+        </div>
+
+        <div class="form-control mt-6">
+          <button class="btn btn-primary">
+            {% if is_create %}
+              Create class
+            {% else %}
+              Update class
+            {% endif %}
+            <span
+              class="loading loading-infinity loading-md htmx-indicator"
+            ></span>
+          </button>
+        </div>
+
+        <div id="error-message"></div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

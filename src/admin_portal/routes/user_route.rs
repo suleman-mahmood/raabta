@@ -23,20 +23,25 @@ async fn users(pool: web::Data<PgPool>) -> HttpResponse {
 
 #[derive(Template)]
 #[template(path = "view_user.html")]
-struct ViewUserTemplate<'a> {
-    user: &'a GetUserWithCredDb,
+struct ViewUserTemplate {
+    user: GetUserWithCredDb,
 }
 
 #[derive(Deserialize)]
-struct ViewUserQuery {
+struct UserQuery {
     user_id: String,
 }
 
 #[get("/view")]
-async fn view_user(query: web::Query<ViewUserQuery>, pool: web::Data<PgPool>) -> HttpResponse {
+async fn view_user(query: web::Query<UserQuery>, pool: web::Data<PgPool>) -> HttpResponse {
     match user_db::get_user(&query.user_id, &pool).await {
-        Ok(user) => HttpResponse::Ok().body(ViewUserTemplate { user: &user }.render().unwrap()),
-        Err(_) => HttpResponse::Ok().body("User not found"),
+        Ok(user) => HttpResponse::Ok().body(ViewUserTemplate { user }.render().unwrap()),
+        Err(e) => {
+            log::error!("Couldn't get user from db: {:?}", e);
+            return HttpResponse::Ok()
+                .insert_header(("HX-Location", "/user"))
+                .body("Ok");
+        }
     }
 }
 
@@ -59,13 +64,8 @@ async fn create_user_view() -> HttpResponse {
     )
 }
 
-#[derive(Deserialize)]
-struct EditUserQuery {
-    user_id: String,
-}
-
 #[get("/edit")]
-async fn edit_user_view(query: web::Query<EditUserQuery>, pool: web::Data<PgPool>) -> HttpResponse {
+async fn edit_user_view(query: web::Query<UserQuery>, pool: web::Data<PgPool>) -> HttpResponse {
     let user = match user_db::get_user(&query.user_id, &pool).await {
         Ok(v) => v,
         Err(e) => {
@@ -88,7 +88,7 @@ async fn edit_user_view(query: web::Query<EditUserQuery>, pool: web::Data<PgPool
 #[patch("")]
 async fn edit_user(
     body: web::Form<EditUserFormData>,
-    query: web::Query<EditUserQuery>,
+    query: web::Query<UserQuery>,
     pool: web::Data<PgPool>,
 ) -> HttpResponse {
     let new_user = match CreateUser::parse_from_edit_data(body.0) {
@@ -173,15 +173,10 @@ async fn create_user_bulk(
         .body("")
 }
 
-#[derive(Deserialize)]
-struct DeleteUserQuery {
-    user_id: String,
-}
-
 #[delete("")]
 async fn toggle_archive_user(
     pool: web::Data<PgPool>,
-    query: web::Query<DeleteUserQuery>,
+    query: web::Query<UserQuery>,
 ) -> HttpResponse {
     match user_db::toggle_archive_user(&query.user_id, &pool).await {
         Err(e) => {
