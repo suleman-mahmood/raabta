@@ -1,6 +1,6 @@
 use crate::admin_portal::{
     announcement_route, class_route, cookie_jwt_auth_middleware, dashboard_route, default_route,
-    health_check_route, login_route, user_route,
+    health_check_route, login_route, membership_route, user_route,
 };
 
 use std::net::TcpListener;
@@ -50,6 +50,12 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
                     .service(class_route::view_class)
                     .service(class_route::edit_class)
                     .service(class_route::edit_class_view)
+                    .wrap(from_fn(cookie_jwt_auth_middleware)),
+            )
+            .service(
+                web::scope("/membership")
+                    .service(membership_route::add_user_to_class)
+                    .service(membership_route::remove_user_from_class)
                     .wrap(from_fn(cookie_jwt_auth_middleware)),
             )
             .app_data(db_pool.clone())
