@@ -45,7 +45,57 @@
         </div>
 
         <div id="error-message"></div>
+
       </form>
+
+      <!-- All students -->
+      {% if let Some(class) = class %}
+        <div class="overflow-x-auto">
+          <table class="table table-xs table-pin-rows table-pin-cols">
+            <thead>
+              <tr>
+                <th>Display Name</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in users %}
+              <tr>
+                <td>{{ user.display_name }}</td>
+                <td>
+                  {% if let Some(user_class_id) = user.class_id %}
+                    {% if user_class_id.clone() == class.id %}
+                      <input
+                        class="checkbox checkbox-primary"
+                        type="checkbox"
+                        checked
+                        hx-post="/membership/remove-user-class?class_id={{class.id}}&user_id={{user.id}}"
+                        hx-confirm="Add user to class?"
+                        hx-swap="none"
+                      />
+                    {% else %}
+                      <input
+                        class="checkbox checkbox-primary"
+                        type="checkbox"
+                        disabled
+                      />
+                    {% endif %}
+                  {% else %}
+                    <input
+                      class="checkbox checkbox-primary"
+                      type="checkbox"
+                      hx-post="/membership/add-user-class?class_id={{class.id}}&user_id={{user.id}}"
+                      hx-confirm="Add user to class?"
+                      hx-swap="none"
+                    />
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
     </div>
   </div>
 </div>
