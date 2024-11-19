@@ -32,16 +32,19 @@ pub async fn list_users(pool: &PgPool) -> Vec<GetUserDb> {
         GetUserDb,
         r#"
         select
-            public_id as id,
-            display_name,
-            email,
-            phone_number,
-            archived,
-            user_role as "user_role: UserRole"
+            u.public_id as id,
+            c.public_id as "class_id?",
+            u.display_name,
+            u.email,
+            u.phone_number,
+            u.archived,
+            u.user_role as "user_role: UserRole"
         from
-            raabta_user
+            raabta_user u
+            left join user_class uc on uc.user_id = u.id
+            left join class c on c.id = uc.class_id
         order by
-            created_at
+            u.created_at
         "#
     )
     .fetch_all(pool)

@@ -3,7 +3,9 @@ use askama::Template;
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::admin_portal::{class_db, CreateClassDb, CreateClassFormData, GetClassDb};
+use crate::admin_portal::{
+    class_db, user_db, CreateClassDb, CreateClassFormData, GetClassDb, GetUserDb, UserRole,
+};
 
 #[derive(Template)]
 #[template(path = "classes.html")]
@@ -22,6 +24,7 @@ async fn list_classes_view(pool: web::Data<PgPool>) -> HttpResponse {
 struct CreateClassViewTemplate {
     class: Option<GetClassDb>,
     is_create: bool,
+    users: Vec<GetUserDb>,
 }
 
 #[get("/create")]
@@ -30,6 +33,7 @@ async fn create_class_view() -> HttpResponse {
         CreateClassViewTemplate {
             class: None,
             is_create: true,
+            users: vec![],
         }
         .render()
         .unwrap(),
@@ -62,11 +66,18 @@ async fn view_class(query: web::Query<ClassQuery>, pool: web::Data<PgPool>) -> H
 
 #[get("/edit")]
 async fn edit_class_view(query: web::Query<ClassQuery>, pool: web::Data<PgPool>) -> HttpResponse {
+    let users = user_db::list_users(&pool).await;
+    let users = users
+        .into_iter()
+        .filter(|u| u.user_role == UserRole::Student)
+        .collect();
+
     match class_db::get_class(&query.class_id, &pool).await {
         Ok(class) => HttpResponse::Ok().body(
             CreateClassViewTemplate {
                 class: Some(class),
                 is_create: false,
+                users,
             }
             .render()
             .unwrap(),

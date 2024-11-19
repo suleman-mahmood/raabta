@@ -18,6 +18,7 @@ struct UsersTemplate<'a> {
 #[get("")]
 async fn users(pool: web::Data<PgPool>) -> HttpResponse {
     let users = user_db::list_users(&pool).await;
+    log::info!("Found users: {}", users.len());
     HttpResponse::Ok().body(UsersTemplate { users: &users }.render().unwrap())
 }
 
