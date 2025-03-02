@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        select\n            public_id as id,\n            display_name,\n            email,\n            phone_number,\n            archived,\n            user_role as \"user_role: UserRole\"\n        from\n            raabta_user\n        where\n            public_id = $1\n        ",
+  "query": "\n        select\n            u.public_id as id,\n            c.public_id as \"class_id?\",\n            u.display_name,\n            u.email,\n            u.phone_number,\n            u.archived,\n            u.user_role as \"user_role: UserRole\"\n        from\n            raabta_user u\n            left join user_class uc on uc.user_id = u.id\n            left join class c on c.id = uc.class_id\n        order by\n            u.created_at\n        ",
   "describe": {
     "columns": [
       {
@@ -10,26 +10,31 @@
       },
       {
         "ordinal": 1,
-        "name": "display_name",
+        "name": "class_id?",
         "type_info": "Text"
       },
       {
         "ordinal": 2,
-        "name": "email",
+        "name": "display_name",
         "type_info": "Text"
       },
       {
         "ordinal": 3,
-        "name": "phone_number",
+        "name": "email",
         "type_info": "Text"
       },
       {
         "ordinal": 4,
+        "name": "phone_number",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
         "name": "archived",
         "type_info": "Bool"
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "user_role: UserRole",
         "type_info": {
           "Custom": {
@@ -47,11 +52,10 @@
       }
     ],
     "parameters": {
-      "Left": [
-        "Text"
-      ]
+      "Left": []
     },
     "nullable": [
+      false,
       false,
       false,
       false,
@@ -60,5 +64,5 @@
       false
     ]
   },
-  "hash": "68e9d915b48be7e58d84380ab42145c7168801028c0356d1b2537cbecd4a4a55"
+  "hash": "6f112eaccb23675913a24330c69d902bcc7b2f31e7d89b038f001c19c374d68b"
 }

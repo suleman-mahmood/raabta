@@ -46,6 +46,8 @@ services:
       - "traefik.tcp.routers.raabta_postgres.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.raabta_postgres.entrypoints=pg"
       - "traefik.tcp.services.raabta_postgres.loadbalancer.server.port=5432"
+    ports:
+      - "5432:5432"
 
 volumes:
   raabta_pg_data:

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    update class set\n        display_name = $2\n    where\n        public_id = $1\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a66a981aeda63abbeb921eb6821074b6ea112fd90ccc9fd18db1dc5be2c5b74c"
+}
