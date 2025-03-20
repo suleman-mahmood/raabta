@@ -146,10 +146,14 @@ pub async fn toggle_archive_user(user_id: &str, pool: &PgPool) -> Result<bool, S
     Ok(result.archived)
 }
 
-pub async fn get_user_credential(email: &str, pool: &PgPool) -> Result<String, sqlx::Error> {
-    sqlx::query_scalar!(
+pub async fn get_user_credential(
+    email: &str,
+    pool: &PgPool,
+) -> Result<(String, String), sqlx::Error> {
+    let row = sqlx::query!(
         r#"
         select
+            ru.public_id,
             c.plain_text_password
         from
             credentials c
@@ -160,5 +164,10 @@ pub async fn get_user_credential(email: &str, pool: &PgPool) -> Result<String, s
         email,
     )
     .fetch_one(pool)
-    .await
+    .await;
+
+    match row {
+        Ok(r) => Ok((r.public_id, r.plain_text_password)),
+        Err(e) => Err(e),
+    }
 }

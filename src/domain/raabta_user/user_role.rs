@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialEq, Deserialize, sqlx::Type)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, sqlx::Type)]
 #[sqlx(type_name = "UserRole", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum UserRole {
     Student,

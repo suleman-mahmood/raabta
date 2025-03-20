@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use super::UserRole;
 
 pub struct GetUserDb {
@@ -10,6 +12,7 @@ pub struct GetUserDb {
     pub archived: bool,
 }
 
+#[derive(Serialize)]
 pub struct GetUserWithCredDb {
     pub id: String,
     pub display_name: String,
