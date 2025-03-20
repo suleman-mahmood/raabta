@@ -10,13 +10,13 @@ struct LoginUserBody {
     password: String,
 }
 
-#[post["login"]]
+#[post["/login"]]
 async fn login(body: web::Json<LoginUserBody>, pool: web::Data<PgPool>) -> HttpResponse {
     match commands::auth_cmd::login(&body.email, &body.password, &pool).await {
         Ok(()) => HttpResponse::Ok().finish(),
         Err(e) => {
             log::error!("Login user error: {:?}", e);
-            HttpResponse::BadRequest().finish()
+            HttpResponse::BadRequest().body(e.to_string())
         }
     }
 }
