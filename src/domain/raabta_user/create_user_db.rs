@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use crate::admin_portal::utils::{self};
+use crate::utils;
 
 use super::{DisplayName, EditUserFormData, UserEmail, UserPhoneNumber, UserRole};
 

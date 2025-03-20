@@ -5,7 +5,7 @@ use actix_web::{
     Error,
 };
 
-use super::{decode_jwt_cookie, UserRoleAdminPortal};
+use crate::domain::{decode_jwt_cookie, UserRoleAdminPortal};
 
 fn is_admin(req: &ServiceRequest) -> bool {
     match decode_jwt_cookie(&req) {

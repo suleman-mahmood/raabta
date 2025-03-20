@@ -3,7 +3,7 @@ use serde::Deserialize;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::admin_portal::{AnnouncerName, NewAnnouncement};
+use crate::domain::{AnnouncerName, NewAnnouncement};
 
 #[derive(Deserialize)]
 struct AnnouncementPostData {

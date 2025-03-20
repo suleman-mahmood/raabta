@@ -1,6 +1,6 @@
 use sqlx::PgPool;
 
-use crate::admin_portal::user_db;
+use crate::user_db;
 
 pub async fn login(email: &str, password: &str, pool: &PgPool) -> Result<(), String> {
     let db_password = user_db::get_user_credential(email, pool)

@@ -4,9 +4,10 @@ use askama::Template;
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::admin_portal::{
-    commands, user_db, CreateUser, CreateUserFormData, EditUserFormData, GetUserDb,
-    GetUserWithCredDb,
+use crate::{
+    commands,
+    domain::{CreateUser, CreateUserFormData, EditUserFormData, GetUserDb, GetUserWithCredDb},
+    user_db,
 };
 
 #[derive(Template)]
@@ -130,7 +131,7 @@ struct CreateUserErrorTemplate {
 
 #[post("")]
 async fn create_user(body: web::Form<CreateUserFormData>, pool: web::Data<PgPool>) -> HttpResponse {
-    match commands::create_user(body.0, &pool).await {
+    match commands::user_cmd::create(body.0, &pool).await {
         Ok(_) => HttpResponse::Ok()
             .insert_header(("HX-Location", "/user"))
             .body("Created User!"),
@@ -164,7 +165,7 @@ async fn create_user_bulk(
         let record = record.unwrap();
         let record: CreateUserFormData = record.deserialize(None).unwrap();
 
-        if let Err(e) = commands::create_user(record, &pool).await {
+        if let Err(e) = commands::user_cmd::create(record, &pool).await {
             log::error!("Unable to create user from command: {:?}", e);
         }
     }

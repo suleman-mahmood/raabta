@@ -1,6 +1,6 @@
 use sqlx::{postgres::PgQueryResult, PgPool};
 
-use crate::admin_portal::id_map_db;
+use crate::id_map_db;
 
 pub async fn add_user_to_class(
     user_id: &str,

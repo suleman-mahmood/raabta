@@ -1,6 +1,6 @@
 use sqlx::{postgres::PgQueryResult, PgPool};
 
-use crate::admin_portal::{CreateClassDb, GetClassDb};
+use crate::domain::{CreateClassDb, GetClassDb};
 
 pub async fn list_classes(pool: &PgPool) -> Vec<GetClassDb> {
     sqlx::query_as!(

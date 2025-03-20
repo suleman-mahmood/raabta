@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::admin_portal::utils::{self, generate_public_id};
+use crate::utils::{self, generate_public_id};
 
 use super::{CreateUser, DisplayName, UserEmail, UserPhoneNumber, UserRole};
 
@@ -44,7 +44,8 @@ impl TryFrom<CreateUserFormData> for CreateUser {
 
 #[cfg(test)]
 mod tests {
-    use crate::admin_portal::{CreateUser, UserRole};
+
+    use crate::domain::{CreateUser, UserRole};
 
     use super::CreateUserFormData;
 

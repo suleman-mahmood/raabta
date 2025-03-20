@@ -2,7 +2,7 @@ use actix_web::{get, post, web, HttpResponse};
 use askama::Template;
 use serde::Deserialize;
 
-use crate::admin_portal::{create_jwt_cookie, logout_cookie};
+use crate::domain::{create_jwt_cookie, logout_cookie};
 
 // TODO: Move these to env or config
 const ADMIN_EMAIL: &str = "admin@raabta.com";

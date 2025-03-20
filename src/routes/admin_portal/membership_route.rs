@@ -2,7 +2,7 @@ use actix_web::{post, web, HttpResponse};
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::admin_portal::membership_db;
+use crate::membership_db;
 
 #[derive(Deserialize)]
 struct UserClassFormData {

@@ -2,7 +2,7 @@ use actix_web::{post, web, HttpResponse};
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::admin_portal::commands;
+use crate::commands;
 
 #[derive(Deserialize)]
 struct LoginUserBody {
@@ -12,7 +12,7 @@ struct LoginUserBody {
 
 #[post["login"]]
 async fn login(body: web::Json<LoginUserBody>, pool: web::Data<PgPool>) -> HttpResponse {
-    match commands::auth::login(&body.email, &body.password, &pool).await {
+    match commands::auth_cmd::login(&body.email, &body.password, &pool).await {
         Ok(()) => HttpResponse::Ok().finish(),
         Err(e) => {
             log::error!("Login user error: {:?}", e);

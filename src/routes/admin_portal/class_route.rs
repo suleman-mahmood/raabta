@@ -3,8 +3,10 @@ use askama::Template;
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::admin_portal::{
-    class_db, user_db, CreateClassDb, CreateClassFormData, GetClassDb, GetUserDb, UserRole,
+use crate::{
+    class_db,
+    domain::{CreateClassDb, CreateClassFormData, GetClassDb, GetUserDb, UserRole},
+    user_db,
 };
 
 #[derive(Template)]

@@ -1,8 +1,11 @@
 use sqlx::PgPool;
 
-use crate::admin_portal::{user_db, CreateUser, CreateUserFormData, UserRole};
+use crate::{
+    domain::{CreateUser, CreateUserFormData, UserRole},
+    user_db,
+};
 
-pub async fn create_user(user_form_data: CreateUserFormData, pool: &PgPool) -> Result<(), String> {
+pub async fn create(user_form_data: CreateUserFormData, pool: &PgPool) -> Result<(), String> {
     let mut new_user: CreateUser = user_form_data.try_into()?;
 
     let mut student_inserted = false;

@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use crate::admin_portal::DisplayName;
+use crate::domain::DisplayName;
 
 pub struct CreateClassDb {
     pub id: Uuid,

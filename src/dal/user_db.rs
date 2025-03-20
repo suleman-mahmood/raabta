@@ -1,7 +1,7 @@
 use sqlx::{postgres::PgQueryResult, PgPool};
 use uuid::Uuid;
 
-use crate::admin_portal::{CreateUser, GetUserDb, GetUserWithCredDb, UserRole};
+use crate::domain::{CreateUser, GetUserDb, GetUserWithCredDb, UserRole};
 
 pub async fn get_user(user_id: &str, pool: &PgPool) -> Result<GetUserWithCredDb, sqlx::Error> {
     sqlx::query_as!(
