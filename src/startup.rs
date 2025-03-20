@@ -1,9 +1,9 @@
 use crate::{
     admin_portal::{
-        class_route, cookie_jwt_auth_middleware, dashboard_route, default_route,
-        health_check_route, login_route, membership_route, user_route,
+        announcement_route, class_route, cookie_jwt_auth_middleware, dashboard_route,
+        default_route, health_check_route, login_route, membership_route, user_route,
     },
-    api::announcement_route,
+    api,
 };
 
 use std::net::TcpListener;
@@ -64,8 +64,10 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
             .service(
                 web::scope("/api")
                     .service(
-                        web::scope("/annnoucement").service(announcement_route::create_annoucement),
+                        web::scope("/annnoucement")
+                            .service(api::announcement_route::create_annoucement),
                     )
+                    .service(web::scope("/auth").service(api::auth_route::login))
                     .wrap(from_fn(cookie_jwt_auth_middleware)),
             )
             .app_data(db_pool.clone())

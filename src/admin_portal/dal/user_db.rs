@@ -145,3 +145,20 @@ pub async fn toggle_archive_user(user_id: &str, pool: &PgPool) -> Result<bool, S
 
     Ok(result.archived)
 }
+
+pub async fn get_user_credential(email: &str, pool: &PgPool) -> Result<String, sqlx::Error> {
+    sqlx::query_scalar!(
+        r#"
+        select
+            c.plain_text_password
+        from
+            credentials c
+            join raabta_user ru on c.raabta_user_id = ru.id
+        where
+            ru.email = $1
+        "#,
+        email,
+    )
+    .fetch_one(pool)
+    .await
+}
