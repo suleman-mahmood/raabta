@@ -64,7 +64,12 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
                             .service(api::announcement_route::create_annoucement),
                     )
                     .service(web::scope("/auth").service(api::auth_route::login))
-                    .service(web::scope("/user").service(api::user_route::get_user)),
+                    .service(web::scope("/user").service(api::user_route::get_user))
+                    .service(
+                        web::scope("/class")
+                            .service(api::class_route::get_classes_for_teacher)
+                            .service(api::class_route::list_students_in_class),
+                    ),
             )
             .app_data(db_pool.clone())
     })
