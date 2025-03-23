@@ -20,6 +20,29 @@ pub async fn list_classes(pool: &PgPool) -> Vec<GetClassDb> {
     .unwrap_or(vec![])
 }
 
+pub async fn get_classes_for_teacher(pool: &PgPool, user_id: &str) -> Vec<GetClassDb> {
+    sqlx::query_as!(
+        GetClassDb,
+        r#"
+        select
+            c.public_id as id,
+            c.display_name
+        from
+            class c
+            join user_class uc on uc.class_id = c.id
+            join raabta_user u on u.id = uc.user_id
+        where
+            u.public_id = $1
+        order by
+            c.display_name
+        "#,
+        user_id,
+    )
+    .fetch_all(pool)
+    .await
+    .unwrap_or(vec![])
+}
+
 pub async fn create_class(
     class: CreateClassDb,
     pool: &PgPool,
