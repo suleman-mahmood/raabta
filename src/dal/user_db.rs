@@ -1,7 +1,7 @@
 use sqlx::{postgres::PgQueryResult, PgPool};
 use uuid::Uuid;
 
-use crate::domain::{CreateUser, GetUserDb, GetUserWithCredDb, UserRole};
+use crate::domain::{CreateUser, GetUserDb, GetUserWithCredDb, StudentUser, TeacherUser, UserRole};
 
 use super::id_map_db;
 
@@ -57,10 +57,11 @@ pub async fn list_users(pool: &PgPool) -> Vec<GetUserDb> {
 pub async fn list_children(pool: &PgPool, parent_user_id: &str) -> Vec<GetUserDb> {
     let parent_user_id = match id_map_db::get_user_internal_id(parent_user_id, pool).await {
         Ok(result) => result,
-        Err(_) => {
+        Err(e) => {
             log::error!(
-                "Error get user internal id for public id: {:?}",
-                parent_user_id
+                "Error get user internal id for public id: {:?} Err: {:?}",
+                parent_user_id,
+                e
             );
             return vec![];
         }
@@ -86,6 +87,81 @@ pub async fn list_children(pool: &PgPool, parent_user_id: &str) -> Vec<GetUserDb
             u.created_at
         "#,
         parent_user_id
+    )
+    .fetch_all(pool)
+    .await
+    .unwrap_or(vec![])
+}
+
+pub async fn list_students_in_class(pool: &PgPool, class_id: &str) -> Vec<StudentUser> {
+    let class_id = match id_map_db::get_class_internal_id(class_id, &pool).await {
+        Ok(result) => result,
+        Err(e) => {
+            log::error!(
+                "Error get class internal id for public id: {:?} Err: {:?}",
+                class_id,
+                e
+            );
+            return vec![];
+        }
+    };
+
+    sqlx::query_as!(
+        StudentUser,
+        r#"
+        select
+            u.public_id as id,
+            pu.public_id as parent_user_id,
+            u.display_name
+        from
+            raabta_user u
+            join user_class uc on uc.user_id = u.id
+            left join raabta_user pu on pu.id = u.parent_user_id
+        where
+            uc.class_id = $1
+        "#,
+        class_id
+    )
+    .fetch_all(pool)
+    .await
+    .unwrap_or(vec![])
+}
+
+pub async fn list_teachers_for_student(pool: &PgPool, student_id: &str) -> Vec<TeacherUser> {
+    let student_id = match id_map_db::get_user_internal_id(student_id, &pool).await {
+        Ok(result) => result,
+        Err(e) => {
+            log::error!(
+                "Error get user internal id for public id: {:?} Err: {:?}",
+                student_id,
+                e
+            );
+            return vec![];
+        }
+    };
+
+    sqlx::query_as!(
+        TeacherUser,
+        r#"
+        with user_classes as (
+            select
+                class_id
+            from
+                user_class
+            where
+                user_id = $1 
+        )
+        select 
+            tu.public_id as id,
+            tu.display_name
+        from
+            user_classes ucs
+            join user_class uc on ucs.class_id = uc.class_id
+            join raabta_user tu
+                on tu.id = uc.user_id
+                and tu.user_role = 'TEACHER'
+        "#,
+        student_id
     )
     .fetch_all(pool)
     .await
