@@ -3,6 +3,8 @@ use uuid::Uuid;
 
 use crate::domain::{CreateUser, GetUserDb, GetUserWithCredDb, UserRole};
 
+use super::id_map_db;
+
 pub async fn get_user(user_id: &str, pool: &PgPool) -> Result<GetUserWithCredDb, sqlx::Error> {
     sqlx::query_as!(
         GetUserWithCredDb,
@@ -46,6 +48,44 @@ pub async fn list_users(pool: &PgPool) -> Vec<GetUserDb> {
         order by
             u.created_at
         "#
+    )
+    .fetch_all(pool)
+    .await
+    .unwrap_or(vec![])
+}
+
+pub async fn list_children(pool: &PgPool, parent_user_id: &str) -> Vec<GetUserDb> {
+    let parent_user_id = match id_map_db::get_user_internal_id(parent_user_id, pool).await {
+        Ok(result) => result,
+        Err(_) => {
+            log::error!(
+                "Error get user internal id for public id: {:?}",
+                parent_user_id
+            );
+            return vec![];
+        }
+    };
+    sqlx::query_as!(
+        GetUserDb,
+        r#"
+        select
+            u.public_id as id,
+            c.public_id as "class_id?",
+            u.display_name,
+            u.email,
+            u.phone_number,
+            u.archived,
+            u.user_role as "user_role: UserRole"
+        from
+            raabta_user u
+            left join user_class uc on uc.user_id = u.id
+            left join class c on c.id = uc.class_id
+        where
+            u.parent_user_id = $1
+        order by
+            u.created_at
+        "#,
+        parent_user_id
     )
     .fetch_all(pool)
     .await

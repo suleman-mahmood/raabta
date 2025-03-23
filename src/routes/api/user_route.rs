@@ -19,3 +19,18 @@ async fn get_user(params: web::Query<GetUserQuery>, pool: web::Data<PgPool>) -> 
         }
     }
 }
+
+#[derive(Deserialize)]
+struct GetChildrenQuery {
+    parent_user_id: String,
+}
+
+#[get[""]]
+async fn get_children(
+    params: web::Query<GetChildrenQuery>,
+    pool: web::Data<PgPool>,
+) -> HttpResponse {
+    let children = user_db::list_children(&pool, &params.parent_user_id).await;
+
+    HttpResponse::Ok().json(children)
+}
