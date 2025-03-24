@@ -3,33 +3,13 @@ use serde::Deserialize;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::domain::{AnnouncerName, NewAnnouncement};
+use crate::domain::NewAnnouncement;
 
 #[derive(Deserialize)]
-struct AnnouncementPostData {
-    name: String,
-    announcement: String,
-    announcer_id: String,
-    class_id: Option<String>,
-}
-
-impl TryFrom<AnnouncementPostData> for NewAnnouncement {
-    type Error = String;
-
-    fn try_from(value: AnnouncementPostData) -> Result<Self, Self::Error> {
-        let name = AnnouncerName::parse(value.name.clone())?;
-
-        if value.announcement.trim().is_empty() {
-            return Err("Annoucement cannot be empty".to_string());
-        }
-
-        Ok(Self {
-            announcement: value.announcement.clone(),
-            name,
-            announcer_id: value.announcer_id,
-            class_id: value.class_id,
-        })
-    }
+pub struct AnnouncementPostData {
+    pub announcement: String,
+    pub announcer_id: String,
+    pub class_id: Option<String>,
 }
 
 async fn insert_announcement(
@@ -59,7 +39,7 @@ async fn insert_announcement(
 async fn announce(body: web::Json<AnnouncementPostData>, pool: web::Data<PgPool>) -> HttpResponse {
     log::info!(
         "Saving a new announcement in the database for {}",
-        body.name,
+        body.announcer_id,
     );
     let new_accouncement: NewAnnouncement = match body.0.try_into() {
         Ok(value) => value,

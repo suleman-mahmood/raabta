@@ -1,8 +1,49 @@
+use uuid::Uuid;
+
+use crate::routes::{
+    admin_portal::announcement_route::AnnouncementPostData,
+    api::announcement_route::CreateAnnoucementBody,
+};
+
 pub struct NewAnnouncement {
+    pub id: Uuid,
     pub announcement: String,
-    pub name: AnnouncerName,
     pub announcer_id: String,
     pub class_id: Option<String>,
+}
+
+impl TryFrom<CreateAnnoucementBody> for NewAnnouncement {
+    type Error = String;
+
+    fn try_from(value: CreateAnnoucementBody) -> Result<Self, Self::Error> {
+        if value.announcement.trim().is_empty() {
+            return Err("Annoucement cannot be empty".to_string());
+        }
+
+        Ok(Self {
+            id: Uuid::new_v4(),
+            announcement: value.announcement,
+            announcer_id: value.announcer_id,
+            class_id: value.class_id,
+        })
+    }
+}
+
+impl TryFrom<AnnouncementPostData> for NewAnnouncement {
+    type Error = String;
+
+    fn try_from(value: AnnouncementPostData) -> Result<Self, Self::Error> {
+        if value.announcement.trim().is_empty() {
+            return Err("Annoucement cannot be empty".to_string());
+        }
+
+        Ok(Self {
+            id: Uuid::new_v4(),
+            announcement: value.announcement.clone(),
+            announcer_id: value.announcer_id,
+            class_id: value.class_id,
+        })
+    }
 }
 
 pub struct AnnouncerName(String);
