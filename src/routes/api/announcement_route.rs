@@ -1,4 +1,4 @@
-use actix_web::{post, web, HttpResponse};
+use actix_web::{get, post, web, HttpResponse};
 use serde::Deserialize;
 use sqlx::PgPool;
 
@@ -30,4 +30,22 @@ pub async fn create_announcement(
             },
             |_| HttpResponse::Ok().finish(),
         )
+}
+
+#[derive(Deserialize)]
+struct ListUserAnnoucementsQuery {
+    user_id: String,
+}
+
+#[get["/user"]]
+async fn list_user_announcements(
+    params: web::Query<ListUserAnnoucementsQuery>,
+    pool: web::Data<PgPool>,
+) -> HttpResponse {
+    let mut user_announcements =
+        announcement_db::list_user_announcements(&params.user_id, &pool).await;
+    let admin_announcements = announcement_db::list_admin_announcements(&pool).await;
+
+    user_announcements.extend(admin_announcements);
+    HttpResponse::Ok().json(user_announcements)
 }

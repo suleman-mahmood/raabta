@@ -1,9 +1,25 @@
+use chrono::serde::ts_seconds;
+use serde::Serialize;
+use sqlx::types::chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 use crate::routes::{
     admin_portal::announcement_route::AnnouncementPostData,
     api::announcement_route::CreateAnnoucementBody,
 };
+
+use super::UserRole;
+
+#[derive(Serialize)]
+pub struct UIAnnouncement {
+    pub id: String,
+    pub content: String,
+    #[serde(with = "ts_seconds")]
+    pub created_at: DateTime<Utc>,
+    pub announcer_user_id: String,
+    pub announcer_user_role: UserRole,
+    pub announcer_display_name: String,
+}
 
 pub struct NewAnnouncement {
     pub id: Uuid,

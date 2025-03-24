@@ -27,6 +27,7 @@ jsonwebtoken = {version = "9"}
 regex = "1"
 csv = "1"
 serde_json = "1"
+chrono = {version="0.4", features=["serde"]}
 
 [dependencies.sqlx]
 version = "0.8"

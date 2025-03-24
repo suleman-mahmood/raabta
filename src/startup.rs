@@ -61,7 +61,8 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
                 web::scope("/api")
                     .service(
                         web::scope("/announcement")
-                            .service(api::announcement_route::create_announcement),
+                            .service(api::announcement_route::create_announcement)
+                            .service(api::announcement_route::list_user_announcements),
                     )
                     .service(web::scope("/auth").service(api::auth_route::login))
                     .service(
