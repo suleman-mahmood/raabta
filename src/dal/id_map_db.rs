@@ -27,3 +27,15 @@ pub async fn get_class_internal_id(public_id: &str, pool: &PgPool) -> Result<Uui
     Ok(row.id)
 }
 
+pub async fn get_chat_internal_id(public_id: &str, pool: &PgPool) -> Result<Uuid, sqlx::Error> {
+    let row = sqlx::query!(
+        r#"
+        select id from chat where public_id = $1
+        "#,
+        public_id
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(row.id)
+}

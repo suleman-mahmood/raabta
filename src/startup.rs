@@ -75,7 +75,8 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
                         web::scope("/class")
                             .service(api::class_route::get_classes_for_teacher)
                             .service(api::class_route::list_students_in_class),
-                    ),
+                    )
+                    .service(web::scope("/chat").service(api::chat_route::send_message)),
             )
             .app_data(db_pool.clone())
     })
