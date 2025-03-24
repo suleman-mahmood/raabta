@@ -1,7 +1,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::utils;
+use crate::{domain::ChatMessage, utils};
 
 use super::id_map_db;
 
@@ -127,4 +127,25 @@ pub async fn get_user_common_chats(
         .collect();
 
     Ok(common_chats)
+}
+
+pub async fn get_chat_msgs(chat_id: &Uuid, pool: &PgPool) -> Result<Vec<ChatMessage>, sqlx::Error> {
+    sqlx::query_as!(
+        ChatMessage,
+        r#"
+        select
+            cm.content as message,
+            cm.created_at,
+            ru.public_id as sender_user_id
+        from
+            chat c
+            join public.chat_message cm on c.id = cm.chat_id
+            join public.raabta_user ru on cm.sender_user_id = ru.id
+        where
+            c.id = $1
+        "#,
+        chat_id,
+    )
+    .fetch_all(pool)
+    .await
 }

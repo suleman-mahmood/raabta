@@ -1,3 +1,6 @@
+use chrono::serde::ts_seconds;
+use serde::Serialize;
+use sqlx::types::chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 use crate::routes::api::chat_route::SendMessageBody;
@@ -25,3 +28,10 @@ impl TryFrom<SendMessageBody> for NewChatMessage {
     }
 }
 
+#[derive(Serialize)]
+pub struct ChatMessage {
+    pub message: String,
+    pub sender_user_id: String,
+    #[serde(with = "ts_seconds")]
+    pub created_at: DateTime<Utc>,
+}
