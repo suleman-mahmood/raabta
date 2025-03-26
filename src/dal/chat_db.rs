@@ -113,7 +113,7 @@ pub async fn get_user_common_chats(
 
     let common_chats: Vec<Uuid> = rows
         .into_iter()
-        .map_while(|r| {
+        .filter_map(|r| {
             r.members.and_then(|m| {
                 let exists = [sender_user_id, recipient_user_id]
                     .into_iter()
@@ -143,6 +143,8 @@ pub async fn get_chat_msgs(chat_id: &Uuid, pool: &PgPool) -> Result<Vec<ChatMess
             join public.raabta_user ru on cm.sender_user_id = ru.id
         where
             c.id = $1
+        order by
+            cm.created_at
         "#,
         chat_id,
     )

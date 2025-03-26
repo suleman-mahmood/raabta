@@ -3,9 +3,12 @@ use serde::Serialize;
 use sqlx::types::chrono::{DateTime, Utc};
 use uuid::Uuid;
 
-use crate::routes::{
-    admin_portal::announcement_route::AnnouncementPostData,
-    api::announcement_route::CreateAnnoucementBody,
+use crate::{
+    routes::{
+        admin_portal::announcement_route::AnnouncementPostData,
+        api::announcement_route::CreateAnnoucementBody,
+    },
+    utils,
 };
 
 use super::UserRole;
@@ -23,6 +26,7 @@ pub struct UIAnnouncement {
 
 pub struct NewAnnouncement {
     pub id: Uuid,
+    pub public_id: String,
     pub announcement: String,
     pub announcer_id: String,
     pub class_id: Option<String>,
@@ -38,6 +42,7 @@ impl TryFrom<CreateAnnoucementBody> for NewAnnouncement {
 
         Ok(Self {
             id: Uuid::new_v4(),
+            public_id: utils::generate_public_id(),
             announcement: value.announcement,
             announcer_id: value.announcer_id,
             class_id: value.class_id,
@@ -55,6 +60,7 @@ impl TryFrom<AnnouncementPostData> for NewAnnouncement {
 
         Ok(Self {
             id: Uuid::new_v4(),
+            public_id: utils::generate_public_id(),
             announcement: value.announcement.clone(),
             announcer_id: value.announcer_id,
             class_id: value.class_id,

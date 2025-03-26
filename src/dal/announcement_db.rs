@@ -16,11 +16,12 @@ pub async fn create_announcement(data: NewAnnouncement, pool: &PgPool) -> Result
     sqlx::query!(
         r#"
         insert into announcement
-            (id, announcer_user_id, class_id, content)
+            (id, public_id, announcer_user_id, class_id, content)
         values
-            ($1, $2, $3, $4)
+            ($1, $2, $3, $4, $5)
         "#,
         data.id,
+        data.public_id,
         announcer_user_id,
         class_id,
         data.announcement,
@@ -79,4 +80,3 @@ pub async fn list_admin_announcements(pool: &PgPool) -> Vec<UIAnnouncement> {
     .await
     .unwrap_or(vec![])
 }
-

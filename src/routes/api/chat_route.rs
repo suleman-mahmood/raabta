@@ -42,10 +42,21 @@ async fn list_sender_recipient_msgs(
     params: web::Query<ListSenderRecipientMsgsQuery>,
     pool: web::Data<PgPool>,
 ) -> HttpResponse {
-    let common_chats =
-        chat_db::get_user_common_chats(&params.sender_user_id, &params.recipient_user_id, &pool)
-            .await
-            .unwrap_or(vec![]);
+    let common_chats = match chat_db::get_user_common_chats(
+        &params.sender_user_id,
+        &params.recipient_user_id,
+        &pool,
+    )
+    .await
+    {
+        Ok(d) => d,
+        Err(e) => {
+            log::error!("Error converting message to domain model: {:?}", e);
+            return HttpResponse::BadRequest().finish();
+        }
+    };
+
+    log::info!("Chats: {:?}", common_chats);
 
     if common_chats.len() > 1 {
         log::error!(

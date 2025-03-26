@@ -9,7 +9,7 @@ pub async fn send_message(msg: NewChatMessage, pool: &PgPool) -> Result<(), Stri
 
     let common_chats = chat_db::get_user_common_chats(&msg.sender_id, &msg.recipient_id, pool)
         .await
-        .unwrap_or(vec![]);
+        .map_err(|e| e.to_string())?;
 
     if common_chats.len() > 1 {
         log::error!(

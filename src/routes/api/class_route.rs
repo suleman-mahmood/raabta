@@ -1,5 +1,6 @@
 use actix_web::{get, web, HttpResponse};
 use serde::Deserialize;
+use serde_json::json;
 use sqlx::PgPool;
 
 use crate::{class_db, user_db};
@@ -29,6 +30,13 @@ async fn list_students_in_class(
     params: web::Query<ListStudentsInClassQuery>,
     pool: web::Data<PgPool>,
 ) -> HttpResponse {
-    let students = user_db::list_students_in_class(&pool, &params.class_id).await;
+    let students = match user_db::list_students_in_class(&pool, &params.class_id).await {
+        Ok(d) => d,
+        Err(e) => {
+            log::error!("Error list students in class: {:?}", e);
+            return HttpResponse::Ok().json(json!([]));
+        }
+    };
+
     HttpResponse::Ok().json(students)
 }
