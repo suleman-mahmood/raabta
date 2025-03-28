@@ -10,7 +10,7 @@ use crate::{
 };
 
 #[derive(Template)]
-#[template(path = "classes.html")]
+#[template(path = "class/classes.html")]
 struct ClassesTemplate<'a> {
     classes: &'a Vec<GetClassDb>,
 }
@@ -22,7 +22,7 @@ async fn list_classes_view(pool: web::Data<PgPool>) -> HttpResponse {
     HttpResponse::Ok().body(ClassesTemplate { classes: &classes }.render().unwrap())
 }
 #[derive(Template)]
-#[template(path = "create_edit_class.html")]
+#[template(path = "class/create_edit_class.html")]
 struct CreateClassViewTemplate {
     class: Option<GetClassDb>,
     is_create: bool,
@@ -43,7 +43,7 @@ async fn create_class_view() -> HttpResponse {
 }
 
 #[derive(Template)]
-#[template(path = "view_class.html")]
+#[template(path = "class/view_class.html")]
 struct ViewClassTemplate {
     class: GetClassDb,
 }
@@ -94,7 +94,7 @@ async fn edit_class_view(query: web::Query<ClassQuery>, pool: web::Data<PgPool>)
 }
 
 #[derive(Template)]
-#[template(path = "create_user_error.html")]
+#[template(path = "user/create_user_error.html")]
 struct CreateClassErrorTemplate {
     error_message: String,
 }

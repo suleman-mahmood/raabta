@@ -11,7 +11,7 @@ use crate::{
 };
 
 #[derive(Template)]
-#[template(path = "users.html")]
+#[template(path = "user/users.html")]
 struct UsersTemplate<'a> {
     users: &'a Vec<GetUserDb>,
 }
@@ -24,7 +24,7 @@ async fn users(pool: web::Data<PgPool>) -> HttpResponse {
 }
 
 #[derive(Template)]
-#[template(path = "view_user.html")]
+#[template(path = "user/view_user.html")]
 struct ViewUserTemplate {
     user: GetUserWithCredDb,
 }
@@ -48,7 +48,7 @@ async fn view_user(query: web::Query<UserQuery>, pool: web::Data<PgPool>) -> Htt
 }
 
 #[derive(Template)]
-#[template(path = "create_user.html")]
+#[template(path = "user/create_user.html")]
 struct CreateUserTemplate {
     user: Option<GetUserWithCredDb>,
     is_create: bool,
@@ -124,7 +124,7 @@ async fn edit_user(
 }
 
 #[derive(Template)]
-#[template(path = "create_user_error.html")]
+#[template(path = "user/create_user_error.html")]
 struct CreateUserErrorTemplate {
     error_message: String,
 }

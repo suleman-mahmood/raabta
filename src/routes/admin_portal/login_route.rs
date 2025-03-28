@@ -9,7 +9,7 @@ const ADMIN_EMAIL: &str = "admin@raabta.com";
 const ADMIN_PASS: &str = "root";
 
 #[derive(Template)]
-#[template(path = "login.html")]
+#[template(path = "auth/login.html")]
 struct LoginTemplate {}
 
 #[derive(Deserialize)]
@@ -30,7 +30,7 @@ async fn login(login_query: web::Query<LoginQuery>) -> HttpResponse {
 }
 
 #[derive(Template)]
-#[template(path = "wrong_login_credentials.html")]
+#[template(path = "auth/wrong_login_credentials.html")]
 struct WrongCredentialsTemplate {}
 
 #[derive(Deserialize)]
