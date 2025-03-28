@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select\n            cm.content as message,\n            cm.created_at,\n            ru.public_id as sender_user_id\n        from\n            chat c\n            join public.chat_message cm on c.id = cm.chat_id\n            join public.raabta_user ru on cm.sender_user_id = ru.id\n        where\n            c.id = $1\n        order by\n            cm.created_at\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "message",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "sender_user_id",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "653a3cb0e0c857934413da04e4f2621aee9121ac3aaded0bb27b05fe857b2dd1"
+}

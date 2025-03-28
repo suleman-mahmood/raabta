@@ -1,0 +1,70 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select\n            u.public_id as id,\n            c.public_id as \"class_id?\",\n            u.display_name,\n            u.email,\n            u.phone_number,\n            u.archived,\n            u.user_role as \"user_role: UserRole\"\n        from\n            raabta_user u\n            left join user_class uc on uc.user_id = u.id\n            left join class c on c.id = uc.class_id\n        where\n            u.parent_user_id = $1\n        order by\n            u.created_at\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "class_id?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "display_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "email",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "phone_number",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "archived",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "user_role: UserRole",
+        "type_info": {
+          "Custom": {
+            "name": "userrole",
+            "kind": {
+              "Enum": [
+                "STUDENT",
+                "PARENT",
+                "TEACHER",
+                "SCHOOL_ADMIN"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "944c940ff9a9ae02a287df7f67709705149f3f6c1ee26138833bcc5b749727bf"
+}

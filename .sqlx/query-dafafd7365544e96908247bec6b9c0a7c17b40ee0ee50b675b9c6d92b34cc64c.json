@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select\n            u.public_id as id,\n            pu.public_id as \"parent_user_id?\",\n            u.display_name\n        from\n            raabta_user u\n            join user_class uc on uc.user_id = u.id\n            left join raabta_user pu on pu.id = u.parent_user_id\n        where\n            uc.class_id = $1 and\n            u.user_role = 'STUDENT'\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "parent_user_id?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "display_name",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "dafafd7365544e96908247bec6b9c0a7c17b40ee0ee50b675b9c6d92b34cc64c"
+}

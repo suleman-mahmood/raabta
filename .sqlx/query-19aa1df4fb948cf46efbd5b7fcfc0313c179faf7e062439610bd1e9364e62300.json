@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select\n            c.id as chat_id,\n            array_agg(distinct cm.member_user_id) as members\n        from\n            chat c\n            join public.chat_member cm on c.id = cm.chat_id\n        where\n            cm.member_user_id = $1 or cm.member_user_id = $2\n        group by\n            c.id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "chat_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "members",
+        "type_info": "UuidArray"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "19aa1df4fb948cf46efbd5b7fcfc0313c179faf7e062439610bd1e9364e62300"
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select\n            c.public_id as id,\n            c.display_name\n        from\n            class c\n            join user_class uc on uc.class_id = c.id\n            join raabta_user u on u.id = uc.user_id\n        where\n            u.public_id = $1\n        order by\n            c.display_name\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "30ff852daae2cd93f796260a53e51ae8ac3fab6635efaa6aa583fbabb322e288"
+}
