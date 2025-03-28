@@ -22,7 +22,7 @@ async fn list_classes_view(pool: web::Data<PgPool>) -> HttpResponse {
     HttpResponse::Ok().body(ClassesTemplate { classes: &classes }.render().unwrap())
 }
 #[derive(Template)]
-#[template(path = "create_class.html")]
+#[template(path = "create_edit_class.html")]
 struct CreateClassViewTemplate {
     class: Option<GetClassDb>,
     is_create: bool,
