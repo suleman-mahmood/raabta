@@ -55,13 +55,15 @@
             <thead>
               <tr>
                 <th>Display Name</th>
+                <th>User Role</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {% for user in users %}
               <tr>
-                <td>{{ user.display_name }}</td>
+                <td {% if user.user_role == UserRole::Teacher %}class="text-green-700"{% else %}class="text-yellow-700"{% endif %}>{{ user.display_name }}</td>
+                <td>{{user.user_role}}</td>
                 <td>
                   {% if let Some(user_class_id) = user.class_id %}
                     {% if user_class_id.clone() == class.id %}

@@ -71,7 +71,7 @@ async fn edit_class_view(query: web::Query<ClassQuery>, pool: web::Data<PgPool>)
     let users = user_db::list_users(&pool).await;
     let users = users
         .into_iter()
-        .filter(|u| u.user_role == UserRole::Student)
+        .filter(|u| u.user_role == UserRole::Student || u.user_role == UserRole::Teacher)
         .collect();
 
     match class_db::get_class(&query.class_id, &pool).await {
