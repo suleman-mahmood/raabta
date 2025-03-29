@@ -85,6 +85,11 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
                         web::scope("/attendance")
                             .service(api::attendance_route::list_user_attendance)
                             .service(api::attendance_route::mark_attendance),
+                    )
+                    .service(
+                        web::scope("/homework")
+                            .service(api::homework_route::list_homeworks)
+                            .service(api::homework_route::create_homework),
                     ),
             )
             .app_data(db_pool.clone())
