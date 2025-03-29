@@ -80,6 +80,11 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
                         web::scope("/chat")
                             .service(api::chat_route::send_message)
                             .service(api::chat_route::list_sender_recipient_msgs),
+                    )
+                    .service(
+                        web::scope("/attendance")
+                            .service(api::attendance_route::list_user_attendance)
+                            .service(api::attendance_route::mark_attendance),
                     ),
             )
             .app_data(db_pool.clone())
