@@ -1,6 +1,7 @@
 use crate::middleware::cookie_jwt_auth_middleware;
 use crate::routes::admin_portal;
 use crate::routes::api;
+use crate::routes::api::storage_route;
 
 use std::net::TcpListener;
 
@@ -90,7 +91,8 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
                         web::scope("/homework")
                             .service(api::homework_route::list_homeworks)
                             .service(api::homework_route::create_homework),
-                    ),
+                    )
+                    .service(web::scope("/storage").service(storage_route::check_storage)),
             )
             .app_data(db_pool.clone())
     })
