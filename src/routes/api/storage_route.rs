@@ -1,8 +1,4 @@
-use actix_multipart::form::{
-    json::{self, Json as MpJson},
-    tempfile::TempFile,
-    MultipartForm,
-};
+use actix_multipart::form::{json::Json as MpJson, tempfile::TempFile, MultipartForm};
 use actix_web::{get, post, web, HttpResponse};
 use aws_config::BehaviorVersion;
 use aws_sdk_s3::{primitives::ByteStream, Client};
