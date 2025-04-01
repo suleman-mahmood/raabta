@@ -47,7 +47,8 @@ async fn upload_file(
     let bucket_name = "raabta-dev";
 
     let body = ByteStream::from_path(form.file.file.path()).await.unwrap();
-    let res = client
+    // TODO: Pass mime type / content type from Metadata and store in bucket
+    client
         .put_object()
         .bucket(bucket_name)
         .key(form.file.file_name.unwrap_or("no-name".to_string()))
@@ -57,4 +58,36 @@ async fn upload_file(
         .unwrap();
 
     HttpResponse::Ok().json(json!({"file_id": "file-id-from-rust"}))
+}
+
+#[derive(Deserialize)]
+struct DownloadFileQuery {
+    file_id: String,
+}
+
+#[get["/download"]]
+async fn download_file(
+    params: web::Query<DownloadFileQuery>,
+    pool: web::Data<PgPool>,
+) -> HttpResponse {
+    let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
+    let client = Client::new(&config);
+    let bucket_name = "raabta-dev";
+
+    let res = client
+        .get_object()
+        .bucket(bucket_name)
+        .key(params.file_id.clone())
+        .send()
+        .await
+        .unwrap();
+
+    log::info!("{:?}", res.content_type);
+
+    HttpResponse::Ok()
+        .content_type(
+            res.content_type
+                .unwrap_or("application/octet-stream".to_string()),
+        )
+        .body(res.body.collect().await.unwrap().into_bytes())
 }

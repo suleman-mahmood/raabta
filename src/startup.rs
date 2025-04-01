@@ -95,6 +95,7 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
                     .service(
                         web::scope("/storage")
                             .service(storage_route::check_storage)
+                            .service(storage_route::download_file)
                             .service(storage_route::upload_file),
                     ),
             )
