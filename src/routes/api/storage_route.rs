@@ -27,7 +27,7 @@ async fn check_storage() -> HttpResponse {
 
 #[derive(Debug, Deserialize)]
 struct Metadata {
-    name: String,
+    mime_type: String,
 }
 
 #[derive(Debug, MultipartForm)]
@@ -47,9 +47,9 @@ async fn upload_file(
     let bucket_name = "raabta-dev";
 
     let body = ByteStream::from_path(form.file.file.path()).await.unwrap();
-    // TODO: Pass mime type / content type from Metadata and store in bucket
     client
         .put_object()
+        .content_type(form.json.mime_type.clone())
         .bucket(bucket_name)
         .key(form.file.file_name.unwrap_or("no-name".to_string()))
         .body(body)
