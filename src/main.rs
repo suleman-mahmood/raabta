@@ -1,7 +1,7 @@
 use std::net::TcpListener;
 
 use env_logger::Env;
-use forge::{configuration::get_configuration, startup::run};
+use forge::{configuration::get_configuration, startup::run, S3};
 use sqlx::postgres::PgPoolOptions;
 
 #[tokio::main]
@@ -15,6 +15,7 @@ async fn main() -> std::io::Result<()> {
         configuration.application.host, configuration.application.port
     );
     let listener = TcpListener::bind(address)?;
+    let s3 = S3::new().await;
 
-    run(listener, connection_pool)?.await
+    run(listener, connection_pool, s3)?.await
 }

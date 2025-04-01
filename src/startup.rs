@@ -2,6 +2,7 @@ use crate::middleware::cookie_jwt_auth_middleware;
 use crate::routes::admin_portal;
 use crate::routes::api;
 use crate::routes::api::storage_route;
+use crate::S3;
 
 use std::net::TcpListener;
 
@@ -14,8 +15,10 @@ use actix_web::{
 };
 use sqlx::PgPool;
 
-pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Error> {
+pub fn run(listener: TcpListener, db_pool: PgPool, s3: S3) -> Result<Server, std::io::Error> {
     let db_pool = web::Data::new(db_pool);
+    let s3 = web::Data::new(s3);
+
     let server = HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
@@ -94,12 +97,12 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
                     )
                     .service(
                         web::scope("/storage")
-                            .service(storage_route::check_storage)
                             .service(storage_route::download_file)
                             .service(storage_route::upload_file),
                     ),
             )
             .app_data(db_pool.clone())
+            .app_data(s3.clone())
     })
     .listen(listener)?
     .run();
