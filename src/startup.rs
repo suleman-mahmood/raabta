@@ -1,6 +1,8 @@
 use crate::middleware::cookie_jwt_auth_middleware;
 use crate::routes::admin_portal;
 use crate::routes::api;
+use crate::routes::api::fee_route;
+use crate::routes::api::invoice_route;
 use crate::routes::api::storage_route;
 use crate::S3;
 
@@ -99,6 +101,17 @@ pub fn run(listener: TcpListener, db_pool: PgPool, s3: S3) -> Result<Server, std
                         web::scope("/storage")
                             .service(storage_route::download_file)
                             .service(storage_route::upload_file),
+                    )
+                    .service(
+                        web::scope("/fee")
+                            .service(fee_route::create_fee)
+                            .service(fee_route::list_fees),
+                    )
+                    .service(
+                        web::scope("/invoice")
+                            .service(invoice_route::create_paid_invoice)
+                            .service(invoice_route::list_invoices)
+                            .service(invoice_route::view_invoice_pdf),
                     ),
             )
             .app_data(db_pool.clone())
