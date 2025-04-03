@@ -3,7 +3,9 @@ pub mod attendance;
 pub mod chat;
 pub mod class;
 pub mod cookie;
+pub mod fee;
 pub mod homework;
+pub mod invoice;
 pub mod raabta_user;
 
 pub use announcement::*;
@@ -11,5 +13,7 @@ pub use attendance::*;
 pub use chat::*;
 pub use class::*;
 pub use cookie::*;
+pub use fee::*;
 pub use homework::*;
+pub use invoice::*;
 pub use raabta_user::*;

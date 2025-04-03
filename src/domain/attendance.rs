@@ -28,9 +28,9 @@ pub enum AttendanceLocation {
     Class,
 }
 
+// id
 pub struct CreateAttendance {
-    pub id: Uuid,
-    pub public_id: String,
+    pub id: String,
     pub attendee_user_id: String,
     pub marker_user_id: Option<String>, // None if done automatically by card scan
     pub attendance_method: AttendanceMethod,
@@ -83,8 +83,7 @@ impl TryFrom<MarkAttendanceBody> for CreateAttendance {
             }
         };
         Ok(Self {
-            id: Uuid::new_v4(),
-            public_id: utils::generate_public_id(),
+            id: utils::generate_public_id(),
             attendee_user_id: value.attendee_user_id,
             marker_user_id: value.marker_user_id,
             attendance_method,
