@@ -3,9 +3,11 @@ use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use sqlx::PgPool;
 
+use crate::homework_db;
+
 #[derive(Deserialize)]
 struct ListHomeworksQuery {
-    user_id: String,
+    class_id: String,
 }
 
 #[get[""]]
@@ -13,7 +15,15 @@ async fn list_homeworks(
     params: web::Query<ListHomeworksQuery>,
     pool: web::Data<PgPool>,
 ) -> HttpResponse {
-    todo!()
+    homework_db::list_homeworks(&params.class_id, &pool)
+        .await
+        .map_or_else(
+            |e| {
+                log::error!("List homework db failed: {:?}", e);
+                HttpResponse::BadRequest().finish()
+            },
+            |v| HttpResponse::Ok().json(v),
+        )
 }
 
 #[derive(Deserialize)]
@@ -21,6 +31,7 @@ pub struct CreateHomeworkBody {
     pub title: String,
     pub prompt: String,
     pub teacher_user_id: String,
+    pub class_id: String,
     pub attachment_ids: Vec<String>,
     pub deadline: DateTime<Utc>,
 }
@@ -30,5 +41,21 @@ async fn create_homework(
     body: web::Json<CreateHomeworkBody>,
     pool: web::Data<PgPool>,
 ) -> HttpResponse {
-    todo!()
+    let homework = match body.0.try_into() {
+        Ok(v) => v,
+        Err(e) => {
+            log::error!("Error converting homework to domain model: {:?}", e);
+            return HttpResponse::BadRequest().body(e);
+        }
+    };
+
+    homework_db::create_homework(homework, &pool)
+        .await
+        .map_or_else(
+            |e| {
+                log::error!("Insert homework db failed: {:?}", e);
+                HttpResponse::BadRequest().finish()
+            },
+            |_| HttpResponse::Ok().finish(),
+        )
 }

@@ -8,6 +8,7 @@ use crate::utils;
 pub struct CreateHomework {
     pub id: String,
     pub teacher_user_id: String,
+    pub class_id: String,
     pub title: String,
     pub prompt: String,
     pub attachment_ids: Vec<String>,
@@ -30,6 +31,7 @@ impl TryFrom<CreateHomeworkBody> for CreateHomework {
         Ok(Self {
             id: utils::generate_public_id(),
             teacher_user_id: value.teacher_user_id,
+            class_id: value.class_id,
             title: value.title,
             prompt: value.prompt,
             attachment_ids: value.attachment_ids,

@@ -39,3 +39,18 @@ pub async fn get_chat_internal_id(public_id: &str, pool: &PgPool) -> Result<Uuid
 
     Ok(row.id)
 }
+pub async fn get_attachment_internal_id(
+    public_id: &str,
+    pool: &PgPool,
+) -> Result<i64, sqlx::Error> {
+    let row = sqlx::query!(
+        r#"
+        select id from attachment where public_id = $1
+        "#,
+        public_id
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(row.id)
+}
