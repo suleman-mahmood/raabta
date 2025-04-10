@@ -1,25 +1,22 @@
 use actix_web::{get, post};
 use actix_web::{web, HttpResponse};
-use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::domain::Invoice;
+use crate::domain::CreateInvoice;
 
 #[derive(Deserialize)]
-pub struct CreatePaidInvoiceBody {
+pub struct CreateInvoiceBody {
     pub fee_id: String,
     pub payer_user_id: String,
-    pub payment_method: String,
-    pub paid_date: DateTime<Utc>,
 }
 
 #[post[""]]
 async fn create_paid_invoice(
-    body: web::Json<CreatePaidInvoiceBody>,
+    body: web::Json<CreateInvoiceBody>,
     pool: web::Data<PgPool>,
 ) -> HttpResponse {
-    let invoice: Invoice = match body.0.try_into() {
+    let invoice: CreateInvoice = match body.0.try_into() {
         Ok(v) => v,
         Err(e) => {
             log::error!("Error converting invoice to domain model: {:?}", e);
