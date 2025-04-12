@@ -6,7 +6,7 @@ use sqlx::PgPool;
 
 use crate::{
     commands,
-    domain::{CreateUserFormData, RaabtaUser, UpdateUserFormData},
+    domain::{CreateUserFormData, UpdateUserFormData},
     user_db::{self, GetUserDb, GetUserWithCredDb, RaabtaUserUpdateDTO},
 };
 
@@ -98,9 +98,11 @@ async fn update_user(
         Err(e) => {
             log::error!("Couldn't parse edit user form data to domain type: {:?}", e);
             return HttpResponse::Ok().body(
-                CreateUserErrorTemplate { error_message: e }
-                    .render()
-                    .unwrap(),
+                CreateUserErrorTemplate {
+                    error_message: e.to_string(),
+                }
+                .render()
+                .unwrap(),
             );
         }
     };

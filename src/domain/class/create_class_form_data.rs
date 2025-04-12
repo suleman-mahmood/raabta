@@ -10,8 +10,8 @@ pub struct CreateClassFormData {
     display_name: String,
 }
 impl TryFrom<CreateClassFormData> for CreateClassDb {
-    type Error = String;
-    fn try_from(value: CreateClassFormData) -> Result<Self, Self::Error> {
+    type Error = anyhow::Error;
+    fn try_from(value: CreateClassFormData) -> anyhow::Result<Self> {
         Ok(Self {
             id: Uuid::new_v4(),
             public_id: utils::generate_public_id(),

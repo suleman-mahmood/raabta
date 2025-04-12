@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+use anyhow::bail;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -21,7 +22,7 @@ pub struct RaabtaUser {
 }
 
 impl RaabtaUser {
-    pub fn create_parent_data(&self) -> Result<Option<Self>, String> {
+    pub fn create_parent_data(&self) -> anyhow::Result<Option<Self>> {
         match self.user_role {
             RaabtaUserRole::Student => {
                 let id = Uuid::new_v4();
@@ -30,7 +31,6 @@ impl RaabtaUser {
                 let display_name = DisplayName::derive_from_student(&self.display_name);
                 let email = RaabtaUserEmail::derive_from_student(&self.email);
 
-                // TODO: Change to create parent DTO
                 Ok(Some(Self {
                     id,
                     public_id,
@@ -42,11 +42,10 @@ impl RaabtaUser {
                 }))
             }
             RaabtaUserRole::Teacher => Ok(None),
-            // TODO: Change to anyhow
-            _ => Err(format!(
+            _ => bail!(
                 "Unknown user role {} for newly created user",
                 self.user_role
-            )),
+            ),
         }
     }
 
@@ -83,9 +82,9 @@ pub struct CreateUserFormData {
 }
 
 impl TryFrom<CreateUserFormData> for RaabtaUser {
-    type Error = String;
+    type Error = anyhow::Error;
 
-    fn try_from(value: CreateUserFormData) -> Result<Self, Self::Error> {
+    fn try_from(value: CreateUserFormData) -> anyhow::Result<Self> {
         let display_name = DisplayName::parse(&value.display_name)?;
         let email = RaabtaUserEmail::derive_from_display_name(&display_name);
         let phone_number = RaabtaUserPhoneNumber::parse(value.phone_number);
@@ -95,10 +94,7 @@ impl TryFrom<CreateUserFormData> for RaabtaUser {
             "student-parent" => RaabtaUserRole::Student,
             "teacher" => RaabtaUserRole::Teacher,
             _ => {
-                return Err(format!(
-                    "Unknown user role from form {}",
-                    value.radio_user_type
-                ))
+                bail!("Unknown user role from form {}", value.radio_user_type)
             }
         };
 
@@ -121,9 +117,9 @@ pub struct UpdateUserFormData {
 }
 
 impl TryFrom<UpdateUserFormData> for RaabtaUserUpdateDTO {
-    type Error = String;
+    type Error = anyhow::Error;
 
-    fn try_from(value: UpdateUserFormData) -> Result<Self, Self::Error> {
+    fn try_from(value: UpdateUserFormData) -> anyhow::Result<Self> {
         let display_name = DisplayName::parse(&value.display_name)?;
         let phone_number = RaabtaUserPhoneNumber::parse_with_error(value.phone_number)?;
 
@@ -141,7 +137,7 @@ impl DisplayName {
         Self(format!("{}'s Parent", display_name.0))
     }
 
-    pub fn parse(display_name: &str) -> Result<Self, String> {
+    pub fn parse(display_name: &str) -> anyhow::Result<Self> {
         let display_name = display_name.trim();
         let display_name_regex_result = Regex::new(r#"^[\d '\w]{3,50}$"#);
 
@@ -149,14 +145,14 @@ impl DisplayName {
             false => match display_name_regex_result {
                 Ok(display_name_regex) => match display_name_regex.is_match(display_name) {
                     true => Ok(Self(display_name.to_string())),
-                    false => Err(format!(
+                    false => bail!(
                         "Display name regex doesn't match for value: {}",
                         display_name
-                    )),
+                    ),
                 },
-                Err(e) => Err(e.to_string()),
+                Err(e) => bail!(e),
             },
-            true => Err("Display name is empty".to_string()),
+            true => bail!("Display name is empty"),
         }
     }
 }
@@ -249,7 +245,7 @@ impl RaabtaUserPhoneNumber {
         }
     }
 
-    pub fn parse_with_error(phone_number: String) -> Result<RaabtaUserPhoneNumber, String> {
+    pub fn parse_with_error(phone_number: String) -> anyhow::Result<RaabtaUserPhoneNumber> {
         let phone_number = phone_number.trim();
         let phone_regex_result = Regex::new(r"^\d{4}-\d{7}$");
         match phone_number.is_empty() {
@@ -259,13 +255,10 @@ impl RaabtaUserPhoneNumber {
                     if phone_regex.is_match(phone_number) {
                         Ok(Self(Some(phone_number.to_string())))
                     } else {
-                        Err(format!(
-                            "Phone number {:?} doesn't pass regex check",
-                            phone_number
-                        ))
+                        bail!("Phone number {:?} doesn't pass regex check", phone_number)
                     }
                 }
-                Err(e) => Err(e.to_string()),
+                Err(e) => bail!(e),
             },
         }
     }
@@ -309,7 +302,7 @@ mod tests {
             radio_user_type: "student-parent".to_string(),
         };
 
-        let result: Result<RaabtaUser, String> = data.try_into();
+        let result: Result<RaabtaUser, anyhow::Error> = data.try_into();
         assert!(result.is_ok());
 
         let result = result.unwrap();
@@ -330,7 +323,7 @@ mod tests {
             radio_user_type: "student-parent".to_string(),
         };
 
-        let result: Result<RaabtaUser, String> = data.try_into();
+        let result: Result<RaabtaUser, anyhow::Error> = data.try_into();
         assert!(result.is_err());
     }
 
@@ -342,7 +335,7 @@ mod tests {
             radio_user_type: "admin".to_string(),
         };
 
-        let result: Result<RaabtaUser, String> = data.try_into();
+        let result: Result<RaabtaUser, anyhow::Error> = data.try_into();
         assert!(result.is_err());
     }
 
@@ -354,7 +347,7 @@ mod tests {
             radio_user_type: "student-parent".to_string(),
         };
 
-        let result: Result<RaabtaUser, String> = data.try_into();
+        let result: Result<RaabtaUser, anyhow::Error> = data.try_into();
         assert!(result.is_ok());
 
         let result = result.unwrap();
@@ -378,7 +371,7 @@ mod tests {
             radio_user_type: "teacher".to_string(),
         };
 
-        let result: Result<RaabtaUser, String> = data.try_into();
+        let result: Result<RaabtaUser, anyhow::Error> = data.try_into();
         assert!(result.is_ok());
 
         let result = result.unwrap();

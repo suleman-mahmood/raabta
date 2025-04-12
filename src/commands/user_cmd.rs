@@ -1,3 +1,4 @@
+use anyhow::bail;
 use sqlx::PgPool;
 
 use crate::{
@@ -5,7 +6,7 @@ use crate::{
     user_db,
 };
 
-pub async fn create(user_form_data: CreateUserFormData, pool: &PgPool) -> Result<(), String> {
+pub async fn create(user_form_data: CreateUserFormData, pool: &PgPool) -> anyhow::Result<()> {
     let mut new_user: RaabtaUser = user_form_data.try_into()?;
 
     let mut student_inserted = false;
@@ -22,13 +23,13 @@ pub async fn create(user_form_data: CreateUserFormData, pool: &PgPool) -> Result
                     continue;
                 }
                 log::error!("Couldn't insert student user into db: {:?}", e);
-                return Err(e.to_string());
+                bail!(e);
             }
         }
     }
     if !student_inserted {
         log::error!("Couldn't insert student user into db because of non unique email");
-        return Err("Choose a different first word in display name".to_string());
+        bail!("Choose a different first word in display name");
     }
 
     let new_user_parent = new_user.create_parent_data()?;
@@ -36,12 +37,8 @@ pub async fn create(user_form_data: CreateUserFormData, pool: &PgPool) -> Result
         let student_user_id = new_user.id;
         let parent_user_id = new_user_parent.id;
 
-        user_db::insert_user(new_user_parent.as_ref().into(), pool)
-            .await
-            .map_err(|e| e.to_string())?;
-        user_db::set_student_parent_id(parent_user_id, student_user_id, pool)
-            .await
-            .map_err(|e| e.to_string())?;
+        user_db::insert_user(new_user_parent.as_ref().into(), pool).await?;
+        user_db::set_student_parent_id(parent_user_id, student_user_id, pool).await?;
     }
 
     Ok(())
