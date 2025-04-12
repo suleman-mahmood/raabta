@@ -29,7 +29,6 @@ pub fn run(listener: TcpListener, db_pool: PgPool, s3: S3) -> Result<Server, std
             .service(admin_portal::health_check_route::health_check)
             .service(admin_portal::login_route::login)
             .service(admin_portal::login_route::submit_login)
-            .service(admin_portal::announcement_route::announce)
             .service(
                 web::scope("/dashboard")
                     .service(admin_portal::dashboard_route::dashboard)

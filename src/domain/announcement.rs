@@ -3,13 +3,7 @@ use serde::Serialize;
 use sqlx::types::chrono::{DateTime, Utc};
 use uuid::Uuid;
 
-use crate::{
-    routes::{
-        admin_portal::announcement_route::AnnouncementPostData,
-        api::announcement_route::CreateAnnoucementBody,
-    },
-    utils,
-};
+use crate::{routes::api::announcement_route::CreateAnnoucementBody, utils};
 
 use super::RaabtaUserRole;
 
@@ -50,10 +44,16 @@ impl TryFrom<CreateAnnoucementBody> for NewAnnouncement {
     }
 }
 
-impl TryFrom<AnnouncementPostData> for NewAnnouncement {
+pub struct CreateAnnouncementFormData {
+    announcement: String,
+    announcer_id: String,
+    class_id: Option<String>,
+}
+
+impl TryFrom<CreateAnnouncementFormData> for NewAnnouncement {
     type Error = String;
 
-    fn try_from(value: AnnouncementPostData) -> Result<Self, Self::Error> {
+    fn try_from(value: CreateAnnouncementFormData) -> Result<Self, Self::Error> {
         if value.announcement.trim().is_empty() {
             return Err("Annoucement cannot be empty".to_string());
         }
