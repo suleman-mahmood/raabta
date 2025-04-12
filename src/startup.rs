@@ -42,7 +42,7 @@ pub fn run(listener: TcpListener, db_pool: PgPool, s3: S3) -> Result<Server, std
                     .service(admin_portal::user_route::create_user)
                     .service(admin_portal::user_route::create_user_bulk)
                     .service(admin_portal::user_route::create_user_view)
-                    .service(admin_portal::user_route::edit_user)
+                    .service(admin_portal::user_route::update_user)
                     .service(admin_portal::user_route::edit_user_view)
                     .service(admin_portal::user_route::toggle_archive_user)
                     .wrap(from_fn(cookie_jwt_auth_middleware)),

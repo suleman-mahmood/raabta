@@ -6,8 +6,8 @@ use sqlx::PgPool;
 
 use crate::{
     commands,
-    domain::{CreateUser, CreateUserFormData, EditUserFormData, GetUserDb, GetUserWithCredDb},
-    user_db,
+    domain::{CreateUserFormData, RaabtaUser, UpdateUserFormData},
+    user_db::{self, GetUserDb, GetUserWithCredDb, RaabtaUserUpdateDTO},
 };
 
 #[derive(Template)]
@@ -88,26 +88,24 @@ async fn edit_user_view(query: web::Query<UserQuery>, pool: web::Data<PgPool>) -
 }
 
 #[patch("")]
-async fn edit_user(
-    body: web::Form<EditUserFormData>,
+async fn update_user(
+    body: web::Form<UpdateUserFormData>,
     query: web::Query<UserQuery>,
     pool: web::Data<PgPool>,
 ) -> HttpResponse {
-    let new_user = match CreateUser::parse_from_edit_data(body.0) {
+    let update_user: RaabtaUserUpdateDTO = match body.0.try_into() {
         Ok(value) => value,
         Err(e) => {
             log::error!("Couldn't parse edit user form data to domain type: {:?}", e);
             return HttpResponse::Ok().body(
-                CreateUserErrorTemplate {
-                    error_message: e.to_string(),
-                }
-                .render()
-                .unwrap(),
+                CreateUserErrorTemplate { error_message: e }
+                    .render()
+                    .unwrap(),
             );
         }
     };
 
-    if let Err(e) = user_db::edit_user(new_user, &query.user_id, &pool).await {
+    if let Err(e) = user_db::edit_user(update_user, &query.user_id, &pool).await {
         log::error!("Couldn't insert user into db: {:?}", e);
         return HttpResponse::Ok().body(
             CreateUserErrorTemplate {

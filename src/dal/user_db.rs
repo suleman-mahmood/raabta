@@ -1,9 +1,21 @@
+use serde::Serialize;
 use sqlx::{postgres::PgQueryResult, PgPool};
 use uuid::Uuid;
 
-use crate::domain::{CreateUser, GetUserDb, GetUserWithCredDb, StudentUser, TeacherUser, UserRole};
+use crate::domain::{RaabtaUser, RaabtaUserRole};
 
 use super::id_map_db;
+
+#[derive(Serialize)]
+pub struct GetUserWithCredDb {
+    pub id: String,
+    pub display_name: String,
+    pub email: String,
+    pub phone_number: Option<String>,
+    pub user_role: RaabtaUserRole,
+    pub archived: bool,
+    pub password: String,
+}
 
 pub async fn get_user(user_id: &str, pool: &PgPool) -> Result<GetUserWithCredDb, sqlx::Error> {
     sqlx::query_as!(
@@ -15,7 +27,7 @@ pub async fn get_user(user_id: &str, pool: &PgPool) -> Result<GetUserWithCredDb,
             email,
             phone_number,
             archived,
-            user_role as "user_role: UserRole",
+            user_role as "user_role: RaabtaUserRole",
             c.plain_text_password as password
         from
             raabta_user ru
@@ -29,6 +41,17 @@ pub async fn get_user(user_id: &str, pool: &PgPool) -> Result<GetUserWithCredDb,
     .await
 }
 
+#[derive(Serialize)]
+pub struct GetUserDb {
+    pub id: String,
+    pub class_id: Option<String>,
+    pub display_name: String,
+    pub email: String,
+    pub phone_number: Option<String>,
+    pub user_role: RaabtaUserRole,
+    pub archived: bool,
+}
+
 pub async fn list_users(pool: &PgPool) -> Vec<GetUserDb> {
     sqlx::query_as!(
         GetUserDb,
@@ -40,7 +63,7 @@ pub async fn list_users(pool: &PgPool) -> Vec<GetUserDb> {
             u.email,
             u.phone_number,
             u.archived,
-            u.user_role as "user_role: UserRole"
+            u.user_role as "user_role: RaabtaUserRole"
         from
             raabta_user u
             left join user_class uc on uc.user_id = u.id
@@ -76,7 +99,7 @@ pub async fn list_children(pool: &PgPool, parent_user_id: &str) -> Vec<GetUserDb
             u.email,
             u.phone_number,
             u.archived,
-            u.user_role as "user_role: UserRole"
+            u.user_role as "user_role: RaabtaUserRole"
         from
             raabta_user u
             left join user_class uc on uc.user_id = u.id
@@ -91,6 +114,13 @@ pub async fn list_children(pool: &PgPool, parent_user_id: &str) -> Vec<GetUserDb
     .fetch_all(pool)
     .await
     .unwrap_or(vec![])
+}
+
+#[derive(Serialize)]
+pub struct StudentUser {
+    id: String,
+    display_name: String,
+    parent_user_id: Option<String>,
 }
 
 pub async fn list_students_in_class(
@@ -118,6 +148,12 @@ pub async fn list_students_in_class(
     )
     .fetch_all(pool)
     .await
+}
+
+#[derive(Serialize)]
+pub struct TeacherUser {
+    id: String,
+    display_name: String,
 }
 
 pub async fn list_teachers_for_student(pool: &PgPool, student_id: &str) -> Vec<TeacherUser> {
@@ -161,8 +197,18 @@ pub async fn list_teachers_for_student(pool: &PgPool, student_id: &str) -> Vec<T
     .unwrap_or(vec![])
 }
 
+pub struct RaabtaUserCreateDTO {
+    pub id: Uuid,
+    pub public_id: String,
+    pub password: String,
+    pub display_name: String,
+    pub email: String,
+    pub phone_number: Option<String>,
+    pub user_role: RaabtaUserRole,
+}
+
 pub async fn insert_user(
-    new_user: &CreateUser,
+    new_user: RaabtaUserCreateDTO,
     pool: &PgPool,
 ) -> Result<PgQueryResult, sqlx::Error> {
     sqlx::query!(
@@ -174,10 +220,10 @@ pub async fn insert_user(
         "#,
         new_user.id,
         new_user.public_id,
-        new_user.display_name.as_ref(),
-        new_user.email.as_ref(),
-        new_user.phone_number.as_ref().clone(),
-        &new_user.user_role as &UserRole,
+        new_user.display_name,
+        new_user.email,
+        new_user.phone_number,
+        &new_user.user_role as &RaabtaUserRole,
     )
     .execute(pool)
     .await?;
@@ -196,8 +242,13 @@ pub async fn insert_user(
     .await
 }
 
+pub struct RaabtaUserUpdateDTO {
+    pub display_name: String,
+    pub phone_number: Option<String>,
+}
+
 pub async fn edit_user(
-    new_user: CreateUser,
+    new_user: RaabtaUserUpdateDTO,
     user_id: &str,
     pool: &PgPool,
 ) -> Result<PgQueryResult, sqlx::Error> {
@@ -210,8 +261,8 @@ pub async fn edit_user(
             public_id = $1
         "#,
         user_id,
-        new_user.display_name.as_ref(),
-        new_user.phone_number.as_ref().clone(),
+        new_user.display_name,
+        new_user.phone_number,
     )
     .execute(pool)
     .await

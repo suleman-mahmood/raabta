@@ -11,7 +11,7 @@ use crate::{
     utils,
 };
 
-use super::UserRole;
+use super::RaabtaUserRole;
 
 #[derive(Serialize)]
 pub struct UIAnnouncement {
@@ -20,7 +20,7 @@ pub struct UIAnnouncement {
     #[serde(with = "ts_seconds")]
     pub created_at: DateTime<Utc>,
     pub announcer_user_id: String,
-    pub announcer_user_role: UserRole,
+    pub announcer_user_role: RaabtaUserRole,
     pub announcer_display_name: String,
 }
 

@@ -5,8 +5,8 @@ use sqlx::PgPool;
 
 use crate::{
     class_db,
-    domain::{CreateClassDb, CreateClassFormData, GetClassDb, GetUserDb, UserRole},
-    user_db,
+    domain::{CreateClassDb, CreateClassFormData, GetClassDb, RaabtaUserRole},
+    user_db::{self, GetUserDb},
 };
 
 #[derive(Template)]
@@ -71,7 +71,9 @@ async fn edit_class_view(query: web::Query<ClassQuery>, pool: web::Data<PgPool>)
     let users = user_db::list_users(&pool).await;
     let users = users
         .into_iter()
-        .filter(|u| u.user_role == UserRole::Student || u.user_role == UserRole::Teacher)
+        .filter(|u| {
+            u.user_role == RaabtaUserRole::Student || u.user_role == RaabtaUserRole::Teacher
+        })
         .collect();
 
     match class_db::get_class(&query.class_id, &pool).await {

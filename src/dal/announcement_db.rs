@@ -1,6 +1,6 @@
 use sqlx::PgPool;
 
-use crate::domain::{NewAnnouncement, UIAnnouncement, UserRole};
+use crate::domain::{NewAnnouncement, RaabtaUserRole, UIAnnouncement};
 
 use super::id_map_db;
 
@@ -41,7 +41,7 @@ pub async fn list_user_announcements(user_id: &str, pool: &PgPool) -> Vec<UIAnno
             a.content,
             a.created_at,
             ru.public_id as announcer_user_id,
-            ru.user_role as "announcer_user_role: UserRole",
+            ru.user_role as "announcer_user_role: RaabtaUserRole",
             ru.display_name as announcer_display_name
         from
             announcement a
@@ -66,7 +66,7 @@ pub async fn list_admin_announcements(pool: &PgPool) -> Vec<UIAnnouncement> {
             a.content,
             a.created_at,
             ru.public_id as announcer_user_id,
-            ru.user_role as "announcer_user_role: UserRole",
+            ru.user_role as "announcer_user_role: RaabtaUserRole",
             ru.display_name as announcer_display_name
         from
             announcement a

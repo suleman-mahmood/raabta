@@ -62,7 +62,7 @@
             <tbody>
               {% for user in users %}
               <tr>
-                <td {% if user.user_role == UserRole::Teacher %}class="text-green-700"{% else %}class="text-yellow-700"{% endif %}>{{ user.display_name }}</td>
+                <td {% if user.user_role == RaabtaUserRole::Teacher %}class="text-green-700"{% else %}class="text-yellow-700"{% endif %}>{{ user.display_name }}</td>
                 <td>{{user.user_role}}</td>
                 <td>
                   {% if let Some(user_class_id) = user.class_id %}
