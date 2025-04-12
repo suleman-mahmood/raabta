@@ -269,10 +269,13 @@ pub async fn edit_user(
 }
 
 pub async fn set_student_parent_id(
-    parent_id: Uuid,
-    student_id: Uuid,
+    parent_id: String,
+    student_id: String,
     pool: &PgPool,
 ) -> Result<PgQueryResult, sqlx::Error> {
+    let student_id = id_map_db::get_user_internal_id(&student_id, pool).await?;
+    let parent_id = id_map_db::get_user_internal_id(&parent_id, pool).await?;
+
     sqlx::query!(
         r#"
         update raabta_user set

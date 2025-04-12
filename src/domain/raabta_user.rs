@@ -11,9 +11,7 @@ use crate::{
 };
 
 pub struct RaabtaUser {
-    // TODO: Make it private
-    pub id: Uuid,
-    public_id: String,
+    id: String,
     password: String,
     display_name: DisplayName,
     email: RaabtaUserEmail,
@@ -25,15 +23,13 @@ impl RaabtaUser {
     pub fn create_parent_data(&self) -> anyhow::Result<Option<Self>> {
         match self.user_role {
             RaabtaUserRole::Student => {
-                let id = Uuid::new_v4();
-                let public_id = utils::generate_public_id();
+                let id = utils::generate_public_id();
                 let password = utils::generate_password();
                 let display_name = DisplayName::derive_from_student(&self.display_name);
                 let email = RaabtaUserEmail::derive_from_student(&self.email);
 
                 Ok(Some(Self {
                     id,
-                    public_id,
                     password,
                     display_name,
                     email,
@@ -52,6 +48,10 @@ impl RaabtaUser {
     pub fn regenerate_email(&mut self, index: u32) {
         self.email.regenerate_email(index);
     }
+
+    pub fn get_id(&self) -> String {
+        self.id.clone()
+    }
 }
 
 impl AsRef<RaabtaUser> for RaabtaUser {
@@ -63,8 +63,8 @@ impl AsRef<RaabtaUser> for RaabtaUser {
 impl From<&RaabtaUser> for RaabtaUserCreateDTO {
     fn from(value: &RaabtaUser) -> Self {
         RaabtaUserCreateDTO {
-            id: value.id,
-            public_id: value.public_id.clone(),
+            id: Uuid::new_v4(),
+            public_id: value.id.clone(),
             password: value.password.clone(),
             display_name: value.display_name.as_ref().to_string(),
             email: value.email.as_ref().to_string(),
@@ -88,7 +88,7 @@ impl TryFrom<CreateUserFormData> for RaabtaUser {
         let display_name = DisplayName::parse(&value.display_name)?;
         let email = RaabtaUserEmail::derive_from_display_name(&display_name);
         let phone_number = RaabtaUserPhoneNumber::parse(value.phone_number);
-        let public_id = utils::generate_public_id();
+        let id = utils::generate_public_id();
         let password = utils::generate_password();
         let user_role = match value.radio_user_type.as_str() {
             "student-parent" => RaabtaUserRole::Student,
@@ -99,8 +99,7 @@ impl TryFrom<CreateUserFormData> for RaabtaUser {
         };
 
         Ok(Self {
-            id: Uuid::new_v4(),
-            public_id,
+            id,
             password,
             display_name,
             email,
@@ -307,7 +306,7 @@ mod tests {
 
         let result = result.unwrap();
 
-        assert_eq!(result.public_id.len(), 16);
+        assert_eq!(result.id.len(), 16);
         assert_eq!(result.password.len(), 4);
         assert_eq!(result.display_name.as_ref(), "Suleman Mahmood");
         assert_eq!(result.email.as_ref(), "suleman@riveroaks.com");
@@ -352,7 +351,7 @@ mod tests {
 
         let result = result.unwrap();
 
-        assert_eq!(result.public_id.len(), 16);
+        assert_eq!(result.id.len(), 16);
         assert_eq!(result.password.len(), 4);
         assert_eq!(result.display_name.as_ref(), "Suleman Mahmood");
         assert_eq!(result.email.as_ref(), "suleman@riveroaks.com");
@@ -376,7 +375,7 @@ mod tests {
 
         let result = result.unwrap();
 
-        assert_eq!(result.public_id.len(), 16);
+        assert_eq!(result.id.len(), 16);
         assert_eq!(result.password.len(), 4);
         assert_eq!(result.display_name.as_ref(), "Suleman Mahmood");
         assert_eq!(result.email.as_ref(), "suleman@riveroaks.com");

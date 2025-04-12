@@ -27,6 +27,7 @@ pub async fn create(user_form_data: CreateUserFormData, pool: &PgPool) -> anyhow
             }
         }
     }
+
     if !student_inserted {
         log::error!("Couldn't insert student user into db because of non unique email");
         bail!("Choose a different first word in display name");
@@ -34,8 +35,8 @@ pub async fn create(user_form_data: CreateUserFormData, pool: &PgPool) -> anyhow
 
     let new_user_parent = new_user.create_parent_data()?;
     if let Some(new_user_parent) = new_user_parent {
-        let student_user_id = new_user.id;
-        let parent_user_id = new_user_parent.id;
+        let student_user_id = new_user.get_id();
+        let parent_user_id = new_user_parent.get_id();
 
         user_db::insert_user(new_user_parent.as_ref().into(), pool).await?;
         user_db::set_student_parent_id(parent_user_id, student_user_id, pool).await?;
