@@ -30,6 +30,7 @@ serde_json = "1"
 chrono = {version="0.4", features=["serde"]}
 aws-config = "1.6.1"
 aws-sdk-s3 = "1.81.0"
+anyhow = "1.0.97"
 
 [dependencies.sqlx]
 version = "0.8"
