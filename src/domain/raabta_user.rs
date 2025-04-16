@@ -81,6 +81,7 @@ pub struct CreateUserFormData {
     radio_user_type: String,
 }
 
+// TODO: Remove this
 impl TryFrom<CreateUserFormData> for RaabtaUser {
     type Error = anyhow::Error;
 

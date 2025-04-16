@@ -1,32 +1,16 @@
-use chrono::serde::ts_seconds;
-use serde::Serialize;
-use sqlx::types::chrono::{DateTime, Utc};
+use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::{routes::api::announcement_route::CreateAnnoucementBody, utils};
+use crate::{announcement_db::AnnouncementCreateDTO, utils};
 
-use super::RaabtaUserRole;
-
-#[derive(Serialize)]
-pub struct UIAnnouncement {
-    pub id: String,
-    pub content: String,
-    #[serde(with = "ts_seconds")]
-    pub created_at: DateTime<Utc>,
-    pub announcer_user_id: String,
-    pub announcer_user_role: RaabtaUserRole,
-    pub announcer_display_name: String,
+#[derive(Deserialize)]
+pub struct CreateAnnoucementBody {
+    announcement: String,
+    announcer_id: String,
+    class_id: Option<String>,
 }
 
-pub struct NewAnnouncement {
-    pub id: Uuid,
-    pub public_id: String,
-    pub announcement: String,
-    pub announcer_id: String,
-    pub class_id: Option<String>,
-}
-
-impl TryFrom<CreateAnnoucementBody> for NewAnnouncement {
+impl TryFrom<CreateAnnoucementBody> for AnnouncementCreateDTO {
     type Error = String;
 
     fn try_from(value: CreateAnnoucementBody) -> Result<Self, Self::Error> {
@@ -41,81 +25,5 @@ impl TryFrom<CreateAnnoucementBody> for NewAnnouncement {
             announcer_id: value.announcer_id,
             class_id: value.class_id,
         })
-    }
-}
-
-pub struct CreateAnnouncementFormData {
-    announcement: String,
-    announcer_id: String,
-    class_id: Option<String>,
-}
-
-impl TryFrom<CreateAnnouncementFormData> for NewAnnouncement {
-    type Error = String;
-
-    fn try_from(value: CreateAnnouncementFormData) -> Result<Self, Self::Error> {
-        if value.announcement.trim().is_empty() {
-            return Err("Annoucement cannot be empty".to_string());
-        }
-
-        Ok(Self {
-            id: Uuid::new_v4(),
-            public_id: utils::generate_public_id(),
-            announcement: value.announcement.clone(),
-            announcer_id: value.announcer_id,
-            class_id: value.class_id,
-        })
-    }
-}
-
-pub struct AnnouncerName(String);
-
-impl AnnouncerName {
-    pub fn parse(s: String) -> Result<AnnouncerName, String> {
-        let is_empty_or_whitespace = s.trim().is_empty();
-        let is_too_long = s.len() > 256;
-
-        if is_empty_or_whitespace || is_too_long {
-            Err(format!("{} is not a valid name", s))
-        } else {
-            Ok(Self(s))
-        }
-    }
-}
-
-impl AsRef<str> for AnnouncerName {
-    fn as_ref(&self) -> &str {
-        &self.0
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::domain::AnnouncerName;
-
-    #[test]
-    fn a_256_length_name_is_valid() {
-        let name = "a".repeat(256);
-        assert!(AnnouncerName::parse(name).is_ok())
-    }
-    #[test]
-    fn a_name_longer_than_256_is_invalid() {
-        let name = "a".repeat(257);
-        assert!(AnnouncerName::parse(name).is_err())
-    }
-    #[test]
-    fn whitespace_only_names_are_rejected() {
-        let name = " ".to_string();
-        assert!(AnnouncerName::parse(name).is_err())
-    }
-    #[test]
-    fn empty_string_is_rejected() {
-        let name = "".to_string();
-        assert!(AnnouncerName::parse(name).is_err())
-    }
-    #[test]
-    fn valid_name_is_parsed_successfully() {
-        let name = "Suleman Mahmood".to_string();
-        assert!(AnnouncerName::parse(name).is_ok())
     }
 }

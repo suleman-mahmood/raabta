@@ -2,21 +2,14 @@ use actix_web::{get, post, web, HttpResponse};
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::{announcement_db, domain::NewAnnouncement};
-
-#[derive(Deserialize)]
-pub struct CreateAnnoucementBody {
-    pub announcement: String,
-    pub announcer_id: String,
-    pub class_id: Option<String>,
-}
+use crate::{announcement_db, domain::CreateAnnoucementBody};
 
 #[post[""]]
 pub async fn create_announcement(
     body: web::Json<CreateAnnoucementBody>,
     pool: web::Data<PgPool>,
 ) -> HttpResponse {
-    let new_accouncement: NewAnnouncement = match body.0.try_into() {
+    let new_accouncement = match body.0.try_into() {
         Ok(value) => value,
         Err(_) => return HttpResponse::BadRequest().finish(),
     };

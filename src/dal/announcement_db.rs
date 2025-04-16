@@ -1,10 +1,25 @@
+use chrono::serde::ts_seconds;
+use serde::Serialize;
+use sqlx::types::chrono::{DateTime, Utc};
 use sqlx::PgPool;
+use uuid::Uuid;
 
-use crate::domain::{NewAnnouncement, RaabtaUserRole, UIAnnouncement};
+use crate::domain::RaabtaUserRole;
 
 use super::id_map_db;
 
-pub async fn create_announcement(data: NewAnnouncement, pool: &PgPool) -> Result<(), sqlx::Error> {
+pub struct AnnouncementCreateDTO {
+    pub id: Uuid,
+    pub public_id: String,
+    pub announcement: String,
+    pub announcer_id: String,
+    pub class_id: Option<String>,
+}
+
+pub async fn create_announcement(
+    data: AnnouncementCreateDTO,
+    pool: &PgPool,
+) -> Result<(), sqlx::Error> {
     let announcer_user_id = id_map_db::get_user_internal_id(&data.announcer_id, pool)
         .await
         .unwrap();
@@ -31,10 +46,22 @@ pub async fn create_announcement(data: NewAnnouncement, pool: &PgPool) -> Result
     .map(|_| ())
 }
 
-pub async fn list_user_announcements(user_id: &str, pool: &PgPool) -> Vec<UIAnnouncement> {
+#[derive(Serialize)]
+pub struct AnnouncementReadDTO {
+    id: String,
+    content: String,
+    announcer_user_id: String,
+    announcer_user_role: RaabtaUserRole,
+    announcer_display_name: String,
+
+    #[serde(with = "ts_seconds")]
+    created_at: DateTime<Utc>,
+}
+
+pub async fn list_user_announcements(user_id: &str, pool: &PgPool) -> Vec<AnnouncementReadDTO> {
     let user_id = id_map_db::get_user_internal_id(user_id, pool).await.ok();
     sqlx::query_as!(
-        UIAnnouncement,
+        AnnouncementReadDTO,
         r#"
         select
             a.public_id as id,
@@ -57,9 +84,9 @@ pub async fn list_user_announcements(user_id: &str, pool: &PgPool) -> Vec<UIAnno
     .unwrap_or(vec![])
 }
 
-pub async fn list_admin_announcements(pool: &PgPool) -> Vec<UIAnnouncement> {
+pub async fn list_admin_announcements(pool: &PgPool) -> Vec<AnnouncementReadDTO> {
     sqlx::query_as!(
-        UIAnnouncement,
+        AnnouncementReadDTO,
         r#"
         select
             a.public_id as id,
