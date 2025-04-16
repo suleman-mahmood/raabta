@@ -1,8 +1,8 @@
-use chrono::serde::ts_seconds;
+use anyhow::bail;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::routes::api::fee_route::{CreateFeeBody, CreateFeeLineItemBody};
+use crate::fee_db::{FeeCreateDTO, FeeLineItemCreateDTO};
 use crate::utils;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, sqlx::Type, Clone)]
@@ -17,45 +17,44 @@ pub enum FeeRecurrence {
     Yearly,
 }
 
-#[derive(Serialize, Clone)]
-pub struct Fee {
-    pub id: String,
-    pub name: String,
-    pub description: Option<String>,
-    pub line_items: Vec<FeeLineItem>,
-    pub recurrence: FeeRecurrence,
-    pub recurring_cycles_count: i32,
+impl TryFrom<&str> for FeeRecurrence {
+    type Error = anyhow::Error;
 
-    #[serde(with = "ts_seconds")]
-    pub invoice_date: DateTime<Utc>,
-
-    #[serde(with = "ts_seconds")]
-    pub due_date: DateTime<Utc>,
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "once" => Ok(FeeRecurrence::Once),
+            "weekly" => Ok(FeeRecurrence::Weekly),
+            "fortnightly" => Ok(FeeRecurrence::Fortnightly),
+            "monthly" => Ok(FeeRecurrence::Monthly),
+            "quaterly" => Ok(FeeRecurrence::Quaterly),
+            "half-yearly" => Ok(FeeRecurrence::HalfYearly),
+            "yearly" => Ok(FeeRecurrence::Yearly),
+            _ => bail!("Unknown recurrence: {}", value),
+        }
+    }
 }
 
-#[derive(Serialize, Clone)]
-pub struct FeeLineItem {
-    pub id: String,
-    pub name: String,
-    pub amount: i32,
-    pub discount_percentage: i32, // 0-10,000 - 00.00 precision
+#[derive(Deserialize, Clone)]
+pub struct CreateFeeBody {
+    name: String,
+    description: Option<String>,
+    line_items: Vec<CreateFeeLineItemBody>,
+    invoice_date: DateTime<Utc>,
+    due_date: DateTime<Utc>,
+    pub class_ids: Vec<String>,
 }
 
-impl TryFrom<CreateFeeBody> for Fee {
+#[derive(Deserialize, Clone)]
+pub struct CreateFeeLineItemBody {
+    name: String,
+    amount: i32,
+    discount_percentage: i32,
+}
+
+impl TryFrom<CreateFeeBody> for FeeCreateDTO {
     type Error = String;
 
     fn try_from(value: CreateFeeBody) -> Result<Self, Self::Error> {
-        // let recurrence = match value.recurrence.as_str() {
-        //     "once" => FeeRecurrence::Once,
-        //     "weekly" => FeeRecurrence::Weekly,
-        //     "fortnightly" => FeeRecurrence::Fortnightly,
-        //     "monthly" => FeeRecurrence::Monthly,
-        //     "quaterly" => FeeRecurrence::Quaterly,
-        //     "half-yearly" => FeeRecurrence::HalfYearly,
-        //     "yearly" => FeeRecurrence::Yearly,
-        //     _ => return Err(format!("Unknown recurrence: {}", value.recurrence)),
-        // };
-
         Ok(Self {
             id: utils::generate_public_id(),
             name: value.name,
@@ -73,7 +72,7 @@ impl TryFrom<CreateFeeBody> for Fee {
     }
 }
 
-impl TryFrom<CreateFeeLineItemBody> for FeeLineItem {
+impl TryFrom<CreateFeeLineItemBody> for FeeLineItemCreateDTO {
     type Error = String;
 
     fn try_from(value: CreateFeeLineItemBody) -> Result<Self, Self::Error> {

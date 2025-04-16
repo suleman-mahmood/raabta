@@ -1,13 +1,37 @@
+use chrono::serde::ts_seconds;
+use chrono::{DateTime, Utc};
+use serde::Serialize;
 use sqlx::PgPool;
 
-use crate::{
-    domain::{Fee, FeeRecurrence},
-    utils,
-};
+use crate::{domain::FeeRecurrence, utils};
 
 use super::id_map_db;
 
-pub async fn create_fee(args: Fee, pool: &PgPool) -> Result<(), sqlx::Error> {
+#[derive(Serialize, Clone)]
+pub struct FeeCreateDTO {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub line_items: Vec<FeeLineItemCreateDTO>,
+    pub recurrence: FeeRecurrence,
+    pub recurring_cycles_count: i32,
+
+    #[serde(with = "ts_seconds")]
+    pub invoice_date: DateTime<Utc>,
+
+    #[serde(with = "ts_seconds")]
+    pub due_date: DateTime<Utc>,
+}
+
+#[derive(Serialize, Clone)]
+pub struct FeeLineItemCreateDTO {
+    pub id: String,
+    pub name: String,
+    pub amount: i32,
+    pub discount_percentage: i32, // 0-10,000 - 00.00 precision
+}
+
+pub async fn create_fee(args: FeeCreateDTO, pool: &PgPool) -> Result<(), sqlx::Error> {
     let fee_row = sqlx::query!(
         r#"
         insert into fee

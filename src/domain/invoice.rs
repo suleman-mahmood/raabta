@@ -1,3 +1,4 @@
+use anyhow::bail;
 use chrono::serde::ts_seconds;
 use chrono::serde::ts_seconds_option;
 use chrono::{DateTime, Utc};
@@ -15,6 +16,19 @@ pub enum InvoicePaymentMethod {
     Cash,
     BankTransfer,
     PaymentGateway,
+}
+
+impl TryFrom<&str> for InvoicePaymentMethod {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "cash" => Ok(InvoicePaymentMethod::Cash),
+            "bank-transfer" => Ok(InvoicePaymentMethod::BankTransfer),
+            "payment-gateway" => Ok(InvoicePaymentMethod::PaymentGateway),
+            _ => bail!("Unknown payment method: {}", value),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, sqlx::Type)]
@@ -54,13 +68,6 @@ impl TryFrom<CreateInvoiceBody> for CreateInvoice {
     type Error = String;
 
     fn try_from(value: CreateInvoiceBody) -> Result<Self, Self::Error> {
-        // let payment_method = match value.payment_method.as_str() {
-        //     "cash" => InvoicePaymentMethod::Cash,
-        //     "bank-transfer" => InvoicePaymentMethod::BankTransfer,
-        //     "payment-gateway" => InvoicePaymentMethod::PaymentGateway,
-        //     _ => return Err(format!("Unknown payment method: {}", value.payment_method)),
-        // };
-
         Ok(Self {
             id: utils::generate_public_id(),
             fee_id: value.fee_id,
