@@ -1,6 +1,6 @@
 -- Add migration script here
 
-alter table homework add column class_id uuid not null references class(id);
+alter table homework add column class_id bigint not null references class(id);
 
 create table attachment (
   id bigint primary key generated always as identity,

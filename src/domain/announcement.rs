@@ -1,5 +1,4 @@
 use serde::Deserialize;
-use uuid::Uuid;
 
 use crate::{announcement_db::AnnouncementCreateDTO, utils};
 
@@ -19,7 +18,6 @@ impl TryFrom<CreateAnnoucementBody> for AnnouncementCreateDTO {
         }
 
         Ok(Self {
-            id: Uuid::new_v4(),
             public_id: utils::generate_public_id(),
             announcement: value.announcement,
             announcer_id: value.announcer_id,

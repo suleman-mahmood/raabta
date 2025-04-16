@@ -3,7 +3,7 @@
 create table fee_payer (
   id bigint primary key generated always as identity,
   fee_id bigint not null references fee(id),
-  payer_user_id uuid not null references raabta_user(id),
+  payer_user_id bigint not null references raabta_user(id),
 
   unique(fee_id, payer_user_id)
 );

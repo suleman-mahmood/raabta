@@ -7,7 +7,7 @@ create table homework (
   title text not null,
   prompt text not null,
 
-	teacher_user_id uuid not null references raabta_user(id),
+	teacher_user_id bigint not null references raabta_user(id),
 
   deadline timestamptz not null,
   created_at timestamptz not null default now()

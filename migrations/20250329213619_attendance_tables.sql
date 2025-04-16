@@ -24,6 +24,6 @@ create table attendance (
   attendance_type AttendanceType not null,
   attendance_location AttendanceLocation not null,
 
-	attendee_user_id uuid not null references raabta_user(id),
-	marker_user_id uuid references raabta_user(id) default null
+	attendee_user_id bigint not null references raabta_user(id),
+	marker_user_id bigint references raabta_user(id) default null
 );

@@ -1,5 +1,4 @@
 use serde::Deserialize;
-use uuid::Uuid;
 
 use crate::{domain::DisplayName, utils};
 
@@ -13,7 +12,6 @@ impl TryFrom<CreateClassFormData> for CreateClassDb {
     type Error = anyhow::Error;
     fn try_from(value: CreateClassFormData) -> anyhow::Result<Self> {
         Ok(Self {
-            id: Uuid::new_v4(),
             public_id: utils::generate_public_id(),
             display_name: DisplayName::parse(&value.display_name)?,
         })

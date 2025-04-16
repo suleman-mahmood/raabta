@@ -1,6 +1,5 @@
 use serde::Serialize;
 use sqlx::{postgres::PgQueryResult, PgPool};
-use uuid::Uuid;
 
 use crate::domain::RaabtaUserRole;
 
@@ -198,7 +197,6 @@ pub async fn list_teachers_for_student(pool: &PgPool, student_id: &str) -> Vec<T
 }
 
 pub struct RaabtaUserCreateDTO {
-    pub id: Uuid,
     pub public_id: String,
     pub password: String,
     pub display_name: String,
@@ -211,21 +209,21 @@ pub async fn insert_user(
     new_user: &RaabtaUserCreateDTO,
     pool: &PgPool,
 ) -> Result<PgQueryResult, sqlx::Error> {
-    sqlx::query!(
+    let row = sqlx::query!(
         r#"
         insert into raabta_user
-            (id, public_id, display_name, email, phone_number, user_role)
+            (public_id, display_name, email, phone_number, user_role)
         values
-            ($1, $2, $3, $4, $5, $6)
+            ($1, $2, $3, $4, $5)
+        returning id
         "#,
-        new_user.id,
         new_user.public_id,
         new_user.display_name,
         new_user.email,
         new_user.phone_number,
         &new_user.user_role as &RaabtaUserRole,
     )
-    .execute(pool)
+    .fetch_one(pool)
     .await?;
 
     sqlx::query!(
@@ -235,7 +233,7 @@ pub async fn insert_user(
         values
             ($1, $2)
         "#,
-        new_user.id,
+        row.id,
         new_user.password,
     )
     .execute(pool)

@@ -50,11 +50,10 @@ pub async fn create_class(
     sqlx::query!(
         r#"
         insert into class
-            (id, public_id, display_name)
+            (public_id, display_name)
         values
-            ($1, $2, $3)
+            ($1, $2)
         "#,
-        class.id,
         class.public_id,
         class.display_name.as_ref(),
     )

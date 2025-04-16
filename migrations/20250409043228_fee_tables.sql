@@ -46,7 +46,7 @@ create table invoice (
   public_id text not null unique,
 
   fee_id bigint not null references fee(id),
-  payer_user_id uuid not null references raabta_user(id),
+  payer_user_id bigint not null references raabta_user(id),
   payment_method InvoicePaymentMethod not null,
 
   paid_date timestamptz not null default now()

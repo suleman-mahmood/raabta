@@ -2,14 +2,12 @@ use chrono::serde::ts_seconds;
 use serde::Serialize;
 use sqlx::types::chrono::{DateTime, Utc};
 use sqlx::PgPool;
-use uuid::Uuid;
 
 use crate::domain::RaabtaUserRole;
 
 use super::id_map_db;
 
 pub struct AnnouncementCreateDTO {
-    pub id: Uuid,
     pub public_id: String,
     pub announcement: String,
     pub announcer_id: String,
@@ -31,11 +29,10 @@ pub async fn create_announcement(
     sqlx::query!(
         r#"
         insert into announcement
-            (id, public_id, announcer_user_id, class_id, content)
+            (public_id, announcer_user_id, class_id, content)
         values
-            ($1, $2, $3, $4, $5)
+            ($1, $2, $3, $4)
         "#,
-        data.id,
         data.public_id,
         announcer_user_id,
         class_id,

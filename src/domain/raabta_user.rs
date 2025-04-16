@@ -3,7 +3,6 @@ use std::fmt::Display;
 use anyhow::bail;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::{
     user_db::{RaabtaUserCreateDTO, RaabtaUserUpdateDTO},
@@ -28,14 +27,12 @@ impl RaabtaUserCreateDTO {
     pub fn create_parent_data(&self) -> anyhow::Result<Option<Self>> {
         match self.user_role {
             RaabtaUserRole::Student => {
-                let id = Uuid::new_v4();
                 let public_id = utils::generate_public_id();
                 let password = utils::generate_password();
                 let display_name = DisplayName::derive_from_student(&self.display_name);
                 let email = RaabtaUserEmail::derive_from_student(&self.email);
 
                 Ok(Some(Self {
-                    id,
                     public_id,
                     password,
                     display_name: display_name.0,
@@ -64,7 +61,6 @@ impl TryFrom<CreateUserFormData> for RaabtaUserCreateDTO {
         let display_name = DisplayName::parse(&value.display_name)?;
         let email = RaabtaUserEmail::derive_from_display_name(&display_name);
         let phone_number = RaabtaUserPhoneNumber::parse(value.phone_number);
-        let id = Uuid::new_v4();
         let public_id = utils::generate_public_id();
         let password = utils::generate_password();
         let user_role = match value.radio_user_type.as_str() {
@@ -76,7 +72,6 @@ impl TryFrom<CreateUserFormData> for RaabtaUserCreateDTO {
         };
 
         Ok(Self {
-            id,
             public_id,
             password,
             display_name: display_name.0,
