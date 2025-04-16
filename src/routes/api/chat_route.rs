@@ -3,14 +3,7 @@ use serde::Deserialize;
 use serde_json::json;
 use sqlx::PgPool;
 
-use crate::{chat_cmd, chat_db};
-
-#[derive(Deserialize)]
-pub struct SendMessageBody {
-    pub sender_user_id: String,
-    pub recipient_user_id: String,
-    pub message: String,
-}
+use crate::{chat_cmd, chat_db, domain::SendMessageBody};
 
 #[post[""]]
 async fn send_message(body: web::Json<SendMessageBody>, pool: web::Data<PgPool>) -> HttpResponse {

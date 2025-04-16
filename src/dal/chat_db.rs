@@ -1,7 +1,10 @@
+use chrono::serde::ts_seconds;
+use serde::Serialize;
+use sqlx::types::chrono::{DateTime, Utc};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::{domain::ChatMessage, utils};
+use crate::utils;
 
 use super::id_map_db;
 
@@ -129,9 +132,21 @@ pub async fn get_user_common_chats(
     Ok(common_chats)
 }
 
-pub async fn get_chat_msgs(chat_id: &Uuid, pool: &PgPool) -> Result<Vec<ChatMessage>, sqlx::Error> {
+#[derive(Serialize)]
+pub struct ChatMessageReadDTO {
+    message: String,
+    sender_user_id: String,
+
+    #[serde(with = "ts_seconds")]
+    created_at: DateTime<Utc>,
+}
+
+pub async fn get_chat_msgs(
+    chat_id: &Uuid,
+    pool: &PgPool,
+) -> Result<Vec<ChatMessageReadDTO>, sqlx::Error> {
     sqlx::query_as!(
-        ChatMessage,
+        ChatMessageReadDTO,
         r#"
         select
             cm.content as message,

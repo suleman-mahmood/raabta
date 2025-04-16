@@ -1,9 +1,9 @@
 use anyhow::bail;
 use sqlx::PgPool;
 
-use crate::{chat_db, domain::NewChatMessage};
+use crate::{chat_db, domain::ChatMessageCreateDTO};
 
-pub async fn send_message(msg: NewChatMessage, pool: &PgPool) -> anyhow::Result<()> {
+pub async fn send_message(msg: ChatMessageCreateDTO, pool: &PgPool) -> anyhow::Result<()> {
     // 1. Check if chat exists between users
     // 2. If not, create a chat
     // 3. Send message in chat
