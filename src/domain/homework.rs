@@ -1,31 +1,20 @@
-use chrono::serde::ts_seconds;
 use chrono::{DateTime, Utc};
-use serde::Serialize;
+use serde::Deserialize;
 
-use crate::routes::api::homework_route::CreateHomeworkBody;
+use crate::homework_db::CreateHomeworkDTO;
 use crate::utils;
 
-pub struct CreateHomework {
-    pub id: String,
-    pub teacher_user_id: String,
-    pub class_id: String,
-    pub title: String,
-    pub prompt: String,
-    pub attachment_ids: Vec<String>,
-    pub deadline: DateTime<Utc>,
+#[derive(Deserialize)]
+pub struct CreateHomeworkBody {
+    title: String,
+    prompt: String,
+    teacher_user_id: String,
+    class_id: String,
+    attachment_ids: Vec<String>,
+    deadline: DateTime<Utc>,
 }
 
-#[derive(Serialize)]
-pub struct Homework {
-    pub id: String,
-    pub title: String,
-    pub prompt: String,
-    pub attachment_ids: Vec<String>,
-    #[serde(with = "ts_seconds")]
-    pub created_at: DateTime<Utc>,
-}
-
-impl TryFrom<CreateHomeworkBody> for CreateHomework {
+impl TryFrom<CreateHomeworkBody> for CreateHomeworkDTO {
     type Error = String;
     fn try_from(value: CreateHomeworkBody) -> Result<Self, Self::Error> {
         Ok(Self {

@@ -1,9 +1,8 @@
 use actix_web::{get, post, web, HttpResponse};
-use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::homework_db;
+use crate::{domain::CreateHomeworkBody, homework_db};
 
 #[derive(Deserialize)]
 struct ListHomeworksQuery {
@@ -24,16 +23,6 @@ async fn list_homeworks(
             },
             |v| HttpResponse::Ok().json(v),
         )
-}
-
-#[derive(Deserialize)]
-pub struct CreateHomeworkBody {
-    pub title: String,
-    pub prompt: String,
-    pub teacher_user_id: String,
-    pub class_id: String,
-    pub attachment_ids: Vec<String>,
-    pub deadline: DateTime<Utc>,
 }
 
 #[post[""]]

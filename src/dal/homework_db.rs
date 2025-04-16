@@ -1,10 +1,21 @@
+use chrono::serde::ts_seconds;
+use chrono::{DateTime, Utc};
+use serde::Serialize;
 use sqlx::PgPool;
-
-use crate::domain::{CreateHomework, Homework};
 
 use super::id_map_db;
 
-pub async fn create_homework(args: CreateHomework, pool: &PgPool) -> Result<(), sqlx::Error> {
+pub struct CreateHomeworkDTO {
+    pub id: String,
+    pub teacher_user_id: String,
+    pub class_id: String,
+    pub title: String,
+    pub prompt: String,
+    pub attachment_ids: Vec<String>,
+    pub deadline: DateTime<Utc>,
+}
+
+pub async fn create_homework(args: CreateHomeworkDTO, pool: &PgPool) -> Result<(), sqlx::Error> {
     let teacher_user_id = id_map_db::get_user_internal_id(&args.teacher_user_id, pool).await?;
 
     let homework_row = sqlx::query!(
@@ -43,11 +54,25 @@ pub async fn create_homework(args: CreateHomework, pool: &PgPool) -> Result<(), 
     Ok(())
 }
 
-pub async fn list_homeworks(class_id: &str, pool: &PgPool) -> Result<Vec<Homework>, sqlx::Error> {
+#[derive(Serialize)]
+pub struct HomeworkReadDTO {
+    id: String,
+    title: String,
+    prompt: String,
+    attachment_ids: Vec<String>,
+
+    #[serde(with = "ts_seconds")]
+    created_at: DateTime<Utc>,
+}
+
+pub async fn list_homeworks(
+    class_id: &str,
+    pool: &PgPool,
+) -> Result<Vec<HomeworkReadDTO>, sqlx::Error> {
     let class_id = id_map_db::get_class_internal_id(&class_id, pool).await?;
 
     sqlx::query_as!(
-        Homework,
+        HomeworkReadDTO,
         r#"
         select
             h.public_id as id,
