@@ -19,13 +19,13 @@ pub async fn send_message(msg: ChatMessageCreateDTO, pool: &PgPool) -> anyhow::R
         bail!("Multiple chats returned between users");
     }
 
-    let chat_id = if common_chats.is_empty() {
-        chat_db::create_chat(&msg.sender_id, &msg.recipient_id, "", pool).await?
+    let chat_id = if let Some(first_chat) = common_chats.first() {
+        first_chat
     } else {
-        common_chats.first().unwrap().to_owned()
+        &chat_db::create_chat(&msg.sender_id, &msg.recipient_id, "", pool).await?
     };
 
-    chat_db::send_message(&msg.message, &msg.sender_id, &chat_id, pool).await?;
+    chat_db::send_message(&msg.message, &msg.sender_id, chat_id, pool).await?;
 
     Ok(())
 }
