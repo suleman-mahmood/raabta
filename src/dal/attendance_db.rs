@@ -1,12 +1,25 @@
+use chrono::serde::ts_seconds;
+use chrono::{DateTime, Utc};
+use serde::Serialize;
 use sqlx::PgPool;
 
-use crate::domain::{
-    Attendance, AttendanceLocation, AttendanceMethod, AttendanceType, CreateAttendance,
-};
+use crate::domain::{AttendanceLocation, AttendanceMethod, AttendanceType};
 
 use super::id_map_db;
 
-pub async fn insert_attendance(args: CreateAttendance, pool: &PgPool) -> Result<(), sqlx::Error> {
+pub struct AttendanceCreateDTO {
+    pub id: String,
+    pub attendee_user_id: String,
+    pub marker_user_id: Option<String>, // None if done automatically by card scan
+    pub attendance_method: AttendanceMethod,
+    pub attendance_type: AttendanceType,
+    pub attendance_location: AttendanceLocation,
+}
+
+pub async fn insert_attendance(
+    args: AttendanceCreateDTO,
+    pool: &PgPool,
+) -> Result<(), sqlx::Error> {
     let attendee_user_id = id_map_db::get_user_internal_id(&args.attendee_user_id, pool).await?;
     let marker_user_id = if let Some(user_id) = &args.marker_user_id {
         Some(id_map_db::get_user_internal_id(&user_id, pool).await?)
@@ -33,14 +46,25 @@ pub async fn insert_attendance(args: CreateAttendance, pool: &PgPool) -> Result<
     .map(|_| ())
 }
 
+#[derive(Serialize)]
+pub struct AttendanceReadDTO {
+    id: String,
+    attendance_method: AttendanceMethod,
+    attendance_type: AttendanceType,
+    attendance_location: AttendanceLocation,
+
+    #[serde(with = "ts_seconds")]
+    marked_at: DateTime<Utc>,
+}
+
 pub async fn list_user_attendance(
     user_id: &str,
     pool: &PgPool,
-) -> Result<Vec<Attendance>, sqlx::Error> {
+) -> Result<Vec<AttendanceReadDTO>, sqlx::Error> {
     let user_id = id_map_db::get_user_internal_id(&user_id, pool).await?;
 
     sqlx::query_as!(
-        Attendance,
+        AttendanceReadDTO,
         r#"
         select
             public_id as id,

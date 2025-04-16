@@ -1,9 +1,6 @@
-use chrono::serde::ts_seconds;
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
-use crate::routes::api::attendance_route::MarkAttendanceBody;
+use crate::attendance_db::AttendanceCreateDTO;
 use crate::utils;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, sqlx::Type)]
@@ -28,27 +25,16 @@ pub enum AttendanceLocation {
     Class,
 }
 
-// id
-pub struct CreateAttendance {
-    pub id: String,
-    pub attendee_user_id: String,
-    pub marker_user_id: Option<String>, // None if done automatically by card scan
-    pub attendance_method: AttendanceMethod,
-    pub attendance_type: AttendanceType,
-    pub attendance_location: AttendanceLocation,
+#[derive(Deserialize)]
+pub struct MarkAttendanceBody {
+    attendee_user_id: String,
+    marker_user_id: Option<String>,
+    attendance_method: String,
+    attendance_type: String,
+    attendance_location: String,
 }
 
-#[derive(Serialize)]
-pub struct Attendance {
-    pub id: String,
-    pub attendance_method: AttendanceMethod,
-    pub attendance_type: AttendanceType,
-    pub attendance_location: AttendanceLocation,
-    #[serde(with = "ts_seconds")]
-    pub marked_at: DateTime<Utc>,
-}
-
-impl TryFrom<MarkAttendanceBody> for CreateAttendance {
+impl TryFrom<MarkAttendanceBody> for AttendanceCreateDTO {
     type Error = String;
     fn try_from(value: MarkAttendanceBody) -> Result<Self, Self::Error> {
         let attendance_method = match value.attendance_method.as_str() {

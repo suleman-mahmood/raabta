@@ -2,7 +2,7 @@ use actix_web::{get, post, web, HttpResponse};
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::attendance_db;
+use crate::{attendance_db, domain::MarkAttendanceBody};
 
 #[derive(Deserialize)]
 struct ListUserAttendanceQuery {
@@ -23,15 +23,6 @@ async fn list_user_attendance(
             },
             |v| HttpResponse::Ok().json(v),
         )
-}
-
-#[derive(Deserialize)]
-pub struct MarkAttendanceBody {
-    pub attendee_user_id: String,
-    pub marker_user_id: Option<String>,
-    pub attendance_method: String,
-    pub attendance_type: String,
-    pub attendance_location: String,
 }
 
 #[post[""]]
