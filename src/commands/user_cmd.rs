@@ -2,16 +2,16 @@ use anyhow::bail;
 use sqlx::PgPool;
 
 use crate::{
-    domain::{CreateUserFormData, RaabtaUser},
-    user_db,
+    domain::CreateUserFormData,
+    user_db::{self, RaabtaUserCreateDTO},
 };
 
 pub async fn create(user_form_data: CreateUserFormData, pool: &PgPool) -> anyhow::Result<()> {
-    let mut new_user: RaabtaUser = user_form_data.try_into()?;
+    let mut new_user: RaabtaUserCreateDTO = user_form_data.try_into()?;
 
     let mut student_inserted = false;
     for i in 1..=9 {
-        let insert_user_result = user_db::insert_user(new_user.as_ref().into(), pool).await;
+        let insert_user_result = user_db::insert_user(&new_user, pool).await;
         match insert_user_result {
             Ok(_) => {
                 student_inserted = true;
@@ -38,7 +38,7 @@ pub async fn create(user_form_data: CreateUserFormData, pool: &PgPool) -> anyhow
         let student_user_id = new_user.get_id();
         let parent_user_id = new_user_parent.get_id();
 
-        user_db::insert_user(new_user_parent.as_ref().into(), pool).await?;
+        user_db::insert_user(&new_user_parent, pool).await?;
         user_db::set_student_parent_id(parent_user_id, student_user_id, pool).await?;
     }
 

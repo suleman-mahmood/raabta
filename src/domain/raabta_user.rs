@@ -10,29 +10,36 @@ use crate::{
     utils,
 };
 
-pub struct RaabtaUser {
-    id: String,
-    password: String,
-    display_name: DisplayName,
-    email: RaabtaUserEmail,
-    phone_number: RaabtaUserPhoneNumber,
-    user_role: RaabtaUserRole,
+#[derive(Debug, Deserialize)]
+pub struct CreateUserFormData {
+    display_name: String,
+    phone_number: String,
+    radio_user_type: String,
 }
 
-impl RaabtaUser {
+impl RaabtaUserCreateDTO {
+    pub fn regenerate_email(&mut self, index: u32) {
+        let mut splits = self.email.split("@");
+        let first_part = splits.next().unwrap();
+        let last_part = splits.next().unwrap();
+        self.email = format!("{}{}@{}", first_part, index, last_part);
+    }
+
     pub fn create_parent_data(&self) -> anyhow::Result<Option<Self>> {
         match self.user_role {
             RaabtaUserRole::Student => {
-                let id = utils::generate_public_id();
+                let id = Uuid::new_v4();
+                let public_id = utils::generate_public_id();
                 let password = utils::generate_password();
                 let display_name = DisplayName::derive_from_student(&self.display_name);
                 let email = RaabtaUserEmail::derive_from_student(&self.email);
 
                 Ok(Some(Self {
                     id,
+                    public_id,
                     password,
-                    display_name,
-                    email,
+                    display_name: display_name.0,
+                    email: email.0,
                     phone_number: self.phone_number.clone(),
                     user_role: RaabtaUserRole::Parent,
                 }))
@@ -45,51 +52,20 @@ impl RaabtaUser {
         }
     }
 
-    pub fn regenerate_email(&mut self, index: u32) {
-        self.email.regenerate_email(index);
-    }
-
     pub fn get_id(&self) -> String {
-        self.id.clone()
+        self.public_id.clone()
     }
 }
 
-impl AsRef<RaabtaUser> for RaabtaUser {
-    fn as_ref(&self) -> &RaabtaUser {
-        self
-    }
-}
-
-impl From<&RaabtaUser> for RaabtaUserCreateDTO {
-    fn from(value: &RaabtaUser) -> Self {
-        RaabtaUserCreateDTO {
-            id: Uuid::new_v4(),
-            public_id: value.id.clone(),
-            password: value.password.clone(),
-            display_name: value.display_name.as_ref().to_string(),
-            email: value.email.as_ref().to_string(),
-            phone_number: value.phone_number.as_ref().clone(),
-            user_role: value.user_role.clone(),
-        }
-    }
-}
-
-#[derive(Debug, Deserialize)]
-pub struct CreateUserFormData {
-    display_name: String,
-    phone_number: String,
-    radio_user_type: String,
-}
-
-// TODO: Remove this
-impl TryFrom<CreateUserFormData> for RaabtaUser {
+impl TryFrom<CreateUserFormData> for RaabtaUserCreateDTO {
     type Error = anyhow::Error;
 
     fn try_from(value: CreateUserFormData) -> anyhow::Result<Self> {
         let display_name = DisplayName::parse(&value.display_name)?;
         let email = RaabtaUserEmail::derive_from_display_name(&display_name);
         let phone_number = RaabtaUserPhoneNumber::parse(value.phone_number);
-        let id = utils::generate_public_id();
+        let id = Uuid::new_v4();
+        let public_id = utils::generate_public_id();
         let password = utils::generate_password();
         let user_role = match value.radio_user_type.as_str() {
             "student-parent" => RaabtaUserRole::Student,
@@ -101,10 +77,11 @@ impl TryFrom<CreateUserFormData> for RaabtaUser {
 
         Ok(Self {
             id,
+            public_id,
             password,
-            display_name,
-            email,
-            phone_number,
+            display_name: display_name.0,
+            email: email.0,
+            phone_number: phone_number.0,
             user_role,
         })
     }
@@ -124,8 +101,8 @@ impl TryFrom<UpdateUserFormData> for RaabtaUserUpdateDTO {
         let phone_number = RaabtaUserPhoneNumber::parse_with_error(value.phone_number)?;
 
         Ok(Self {
-            display_name: display_name.as_ref().to_string(),
-            phone_number: phone_number.as_ref().clone(),
+            display_name: display_name.0,
+            phone_number: phone_number.0,
         })
     }
 }
@@ -133,8 +110,8 @@ impl TryFrom<UpdateUserFormData> for RaabtaUserUpdateDTO {
 pub struct DisplayName(String);
 
 impl DisplayName {
-    pub fn derive_from_student(display_name: &Self) -> Self {
-        Self(format!("{}'s Parent", display_name.0))
+    pub fn derive_from_student(display_name: &str) -> Self {
+        Self(format!("{}'s Parent", display_name))
     }
 
     pub fn parse(display_name: &str) -> anyhow::Result<Self> {
@@ -166,8 +143,8 @@ impl AsRef<str> for DisplayName {
 pub struct RaabtaUserEmail(String);
 
 impl RaabtaUserEmail {
-    pub fn derive_from_student(email: &Self) -> Self {
-        let mut slice_iter = email.0.split("@");
+    pub fn derive_from_student(email: &str) -> Self {
+        let mut slice_iter = email.split("@");
         let first_part = slice_iter.next().unwrap();
         let second_part = slice_iter.next().unwrap();
         Self(format!("{}.parent@{}", first_part, second_part))
@@ -202,13 +179,6 @@ impl RaabtaUserEmail {
                 Err(e) => Err(e.to_string()),
             },
         }
-    }
-
-    pub fn regenerate_email(&mut self, index: u32) {
-        let mut splits = self.0.split("@");
-        let first_part = splits.next().unwrap();
-        let last_part = splits.next().unwrap();
-        self.0 = format!("{}{}@{}", first_part, index, last_part);
     }
 }
 
@@ -292,7 +262,7 @@ impl Display for RaabtaUserRole {
 #[cfg(test)]
 mod tests {
     use super::CreateUserFormData;
-    use crate::domain::{RaabtaUser, RaabtaUserRole};
+    use crate::{domain::RaabtaUserRole, user_db::RaabtaUserCreateDTO};
 
     #[test]
     fn empty_phone_number_is_valid() {
@@ -302,15 +272,15 @@ mod tests {
             radio_user_type: "student-parent".to_string(),
         };
 
-        let result: Result<RaabtaUser, anyhow::Error> = data.try_into();
+        let result: Result<RaabtaUserCreateDTO, anyhow::Error> = data.try_into();
         assert!(result.is_ok());
 
         let result = result.unwrap();
 
-        assert_eq!(result.id.len(), 16);
+        assert_eq!(result.public_id.len(), 16);
         assert_eq!(result.password.len(), 4);
-        assert_eq!(result.display_name.as_ref(), "Suleman Mahmood");
-        assert_eq!(result.email.as_ref(), "suleman@riveroaks.com");
+        assert_eq!(result.display_name, "Suleman Mahmood");
+        assert_eq!(result.email, "suleman@riveroaks.com");
         assert_eq!(result.user_role, RaabtaUserRole::Student);
         assert!(result.phone_number.as_ref().is_none());
     }
@@ -323,7 +293,7 @@ mod tests {
             radio_user_type: "student-parent".to_string(),
         };
 
-        let result: Result<RaabtaUser, anyhow::Error> = data.try_into();
+        let result: Result<RaabtaUserCreateDTO, anyhow::Error> = data.try_into();
         assert!(result.is_err());
     }
 
@@ -335,7 +305,7 @@ mod tests {
             radio_user_type: "admin".to_string(),
         };
 
-        let result: Result<RaabtaUser, anyhow::Error> = data.try_into();
+        let result: Result<RaabtaUserCreateDTO, anyhow::Error> = data.try_into();
         assert!(result.is_err());
     }
 
@@ -347,15 +317,15 @@ mod tests {
             radio_user_type: "student-parent".to_string(),
         };
 
-        let result: Result<RaabtaUser, anyhow::Error> = data.try_into();
+        let result: Result<RaabtaUserCreateDTO, anyhow::Error> = data.try_into();
         assert!(result.is_ok());
 
         let result = result.unwrap();
 
-        assert_eq!(result.id.len(), 16);
+        assert_eq!(result.public_id.len(), 16);
         assert_eq!(result.password.len(), 4);
-        assert_eq!(result.display_name.as_ref(), "Suleman Mahmood");
-        assert_eq!(result.email.as_ref(), "suleman@riveroaks.com");
+        assert_eq!(result.display_name, "Suleman Mahmood");
+        assert_eq!(result.email, "suleman@riveroaks.com");
         assert_eq!(result.user_role, RaabtaUserRole::Student);
         assert_eq!(
             result.phone_number.as_ref().clone().unwrap(),
@@ -371,15 +341,15 @@ mod tests {
             radio_user_type: "teacher".to_string(),
         };
 
-        let result: Result<RaabtaUser, anyhow::Error> = data.try_into();
+        let result: Result<RaabtaUserCreateDTO, anyhow::Error> = data.try_into();
         assert!(result.is_ok());
 
         let result = result.unwrap();
 
-        assert_eq!(result.id.len(), 16);
+        assert_eq!(result.public_id.len(), 16);
         assert_eq!(result.password.len(), 4);
-        assert_eq!(result.display_name.as_ref(), "Suleman Mahmood");
-        assert_eq!(result.email.as_ref(), "suleman@riveroaks.com");
+        assert_eq!(result.display_name, "Suleman Mahmood");
+        assert_eq!(result.email, "suleman@riveroaks.com");
         assert_eq!(result.user_role, RaabtaUserRole::Teacher);
         assert_eq!(
             result.phone_number.as_ref().clone().unwrap(),

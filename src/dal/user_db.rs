@@ -2,7 +2,7 @@ use serde::Serialize;
 use sqlx::{postgres::PgQueryResult, PgPool};
 use uuid::Uuid;
 
-use crate::domain::{RaabtaUser, RaabtaUserRole};
+use crate::domain::RaabtaUserRole;
 
 use super::id_map_db;
 
@@ -208,7 +208,7 @@ pub struct RaabtaUserCreateDTO {
 }
 
 pub async fn insert_user(
-    new_user: RaabtaUserCreateDTO,
+    new_user: &RaabtaUserCreateDTO,
     pool: &PgPool,
 ) -> Result<PgQueryResult, sqlx::Error> {
     sqlx::query!(
